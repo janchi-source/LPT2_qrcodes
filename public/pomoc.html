@@ -99,7 +99,14 @@
       let url = location.origin.replace(/^http:/, 'https:') + '/scan.html';
       try {
         const info = await api('/api/server-info');
-        if (info && info.https_enabled) {
+        if (info && info.hosted) {
+          // Na hostingu (Vercel) je certifikát dôveryhodný sám od seba —
+          // celý krok s inštaláciou by len mýlil.
+          url = location.origin + '/scan.html';
+          el('krok-cert').style.display = 'none';
+          el('stav-popis').textContent = 'Appka beží na internete s platným certifikátom — '
+            + 'nič inštalovať netreba. Pri prvom skenovaní telefón raz spýta na povolenie kamery.';
+        } else if (info && info.https_enabled) {
           const host = location.hostname;
           url = `https://${host}:${info.https_port}/scan.html`;
           if (!info.addresses.includes(host) && info.addresses.length) {

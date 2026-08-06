@@ -5,27 +5,10 @@
     "wristband_number": 1,
     "qr_code": "D001",
     "home_group": 1,
-    "current_group": 1,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
-    "history": [
-      {
-        "round": 1,
-        "station": "A",
-        "action": "correction",
-        "from_group": 6,
-        "to_group": 1,
-        "ts": "2026-08-06T16:49:48.621Z"
-      },
-      {
-        "round": 1,
-        "station": "A",
-        "action": "home",
-        "from_group": 1,
-        "to_group": 1,
-        "ts": "2026-08-06T16:49:48.621Z"
-      }
-    ]
+    "history": []
   },
   {
     "id": "D002",
@@ -33,27 +16,10 @@
     "wristband_number": 2,
     "qr_code": "D002",
     "home_group": 2,
-    "current_group": 2,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
-    "history": [
-      {
-        "round": 1,
-        "station": "A",
-        "action": "correction",
-        "from_group": 7,
-        "to_group": 1,
-        "ts": "2026-08-06T16:49:54.374Z"
-      },
-      {
-        "round": 1,
-        "station": "A",
-        "action": "move",
-        "from_group": 1,
-        "to_group": 2,
-        "ts": "2026-08-06T16:49:54.374Z"
-      }
-    ]
+    "history": []
   },
   {
     "id": "D003",
@@ -61,27 +27,10 @@
     "wristband_number": 3,
     "qr_code": "D003",
     "home_group": 3,
-    "current_group": 2,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
-    "history": [
-      {
-        "round": 1,
-        "station": "A",
-        "action": "correction",
-        "from_group": 8,
-        "to_group": 1,
-        "ts": "2026-08-06T16:49:56.998Z"
-      },
-      {
-        "round": 1,
-        "station": "A",
-        "action": "move",
-        "from_group": 1,
-        "to_group": 2,
-        "ts": "2026-08-06T16:49:56.998Z"
-      }
-    ]
+    "history": []
   },
   {
     "id": "D004",
@@ -89,7 +38,7 @@
     "wristband_number": 4,
     "qr_code": "D004",
     "home_group": 4,
-    "current_group": 9,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -100,7 +49,7 @@
     "wristband_number": 5,
     "qr_code": "D005",
     "home_group": 5,
-    "current_group": 10,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -111,7 +60,7 @@
     "wristband_number": 6,
     "qr_code": "D006",
     "home_group": 6,
-    "current_group": 1,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -122,7 +71,7 @@
     "wristband_number": 7,
     "qr_code": "D007",
     "home_group": 7,
-    "current_group": 2,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -133,7 +82,7 @@
     "wristband_number": 8,
     "qr_code": "D008",
     "home_group": 8,
-    "current_group": 3,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -144,7 +93,7 @@
     "wristband_number": 9,
     "qr_code": "D009",
     "home_group": 9,
-    "current_group": 4,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -155,27 +104,10 @@
     "wristband_number": 10,
     "qr_code": "D010",
     "home_group": 10,
-    "current_group": 2,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
-    "history": [
-      {
-        "round": 1,
-        "station": "A",
-        "action": "correction",
-        "from_group": 5,
-        "to_group": 1,
-        "ts": "2026-08-06T16:50:47.967Z"
-      },
-      {
-        "round": 1,
-        "station": "A",
-        "action": "move",
-        "from_group": 1,
-        "to_group": 2,
-        "ts": "2026-08-06T16:50:47.967Z"
-      }
-    ]
+    "history": []
   },
   {
     "id": "D011",
@@ -183,7 +115,7 @@
     "wristband_number": 11,
     "qr_code": "D011",
     "home_group": 1,
-    "current_group": 5,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -194,7 +126,7 @@
     "wristband_number": 12,
     "qr_code": "D012",
     "home_group": 2,
-    "current_group": 6,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -205,7 +137,7 @@
     "wristband_number": 13,
     "qr_code": "D013",
     "home_group": 3,
-    "current_group": 7,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -216,7 +148,7 @@
     "wristband_number": 14,
     "qr_code": "D014",
     "home_group": 4,
-    "current_group": 8,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -227,7 +159,7 @@
     "wristband_number": 15,
     "qr_code": "D015",
     "home_group": 5,
-    "current_group": 9,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -238,7 +170,7 @@
     "wristband_number": 16,
     "qr_code": "D016",
     "home_group": 6,
-    "current_group": 10,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -249,7 +181,7 @@
     "wristband_number": 17,
     "qr_code": "D017",
     "home_group": 7,
-    "current_group": 1,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -260,27 +192,10 @@
     "wristband_number": 18,
     "qr_code": "D018",
     "home_group": 8,
-    "current_group": 2,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
-    "history": [
-      {
-        "round": 1,
-        "station": "A",
-        "action": "correction",
-        "from_group": 2,
-        "to_group": 1,
-        "ts": "2026-08-06T16:50:49.444Z"
-      },
-      {
-        "round": 1,
-        "station": "A",
-        "action": "move",
-        "from_group": 1,
-        "to_group": 2,
-        "ts": "2026-08-06T16:50:49.444Z"
-      }
-    ]
+    "history": []
   },
   {
     "id": "D019",
@@ -288,7 +203,7 @@
     "wristband_number": 19,
     "qr_code": "D019",
     "home_group": 9,
-    "current_group": 3,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -299,7 +214,7 @@
     "wristband_number": 20,
     "qr_code": "D020",
     "home_group": 10,
-    "current_group": 4,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -310,7 +225,7 @@
     "wristband_number": 21,
     "qr_code": "D021",
     "home_group": 1,
-    "current_group": 4,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -321,7 +236,7 @@
     "wristband_number": 22,
     "qr_code": "D022",
     "home_group": 2,
-    "current_group": 5,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -332,7 +247,7 @@
     "wristband_number": 23,
     "qr_code": "D023",
     "home_group": 3,
-    "current_group": 6,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -343,7 +258,7 @@
     "wristband_number": 24,
     "qr_code": "D024",
     "home_group": 4,
-    "current_group": 7,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -354,7 +269,7 @@
     "wristband_number": 25,
     "qr_code": "D025",
     "home_group": 5,
-    "current_group": 8,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -365,7 +280,7 @@
     "wristband_number": 26,
     "qr_code": "D026",
     "home_group": 6,
-    "current_group": 9,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -376,7 +291,7 @@
     "wristband_number": 27,
     "qr_code": "D027",
     "home_group": 7,
-    "current_group": 10,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -387,7 +302,7 @@
     "wristband_number": 28,
     "qr_code": "D028",
     "home_group": 8,
-    "current_group": 1,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -398,7 +313,7 @@
     "wristband_number": 29,
     "qr_code": "D029",
     "home_group": 9,
-    "current_group": 2,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -409,7 +324,7 @@
     "wristband_number": 30,
     "qr_code": "D030",
     "home_group": 10,
-    "current_group": 3,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -420,7 +335,7 @@
     "wristband_number": 31,
     "qr_code": "D031",
     "home_group": 1,
-    "current_group": 3,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -431,7 +346,7 @@
     "wristband_number": 32,
     "qr_code": "D032",
     "home_group": 2,
-    "current_group": 4,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -442,7 +357,7 @@
     "wristband_number": 33,
     "qr_code": "D033",
     "home_group": 3,
-    "current_group": 5,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -453,7 +368,7 @@
     "wristband_number": 34,
     "qr_code": "D034",
     "home_group": 4,
-    "current_group": 6,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -464,7 +379,7 @@
     "wristband_number": 35,
     "qr_code": "D035",
     "home_group": 5,
-    "current_group": 7,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -475,7 +390,7 @@
     "wristband_number": 36,
     "qr_code": "D036",
     "home_group": 6,
-    "current_group": 8,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -486,7 +401,7 @@
     "wristband_number": 37,
     "qr_code": "D037",
     "home_group": 7,
-    "current_group": 9,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -497,7 +412,7 @@
     "wristband_number": 38,
     "qr_code": "D038",
     "home_group": 8,
-    "current_group": 10,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -508,7 +423,7 @@
     "wristband_number": 39,
     "qr_code": "D039",
     "home_group": 9,
-    "current_group": 1,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -519,7 +434,7 @@
     "wristband_number": 40,
     "qr_code": "D040",
     "home_group": 10,
-    "current_group": 2,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -530,7 +445,7 @@
     "wristband_number": 41,
     "qr_code": "D041",
     "home_group": 1,
-    "current_group": 2,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -541,7 +456,7 @@
     "wristband_number": 42,
     "qr_code": "D042",
     "home_group": 2,
-    "current_group": 3,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -552,27 +467,10 @@
     "wristband_number": 43,
     "qr_code": "D043",
     "home_group": 3,
-    "current_group": 2,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
-    "history": [
-      {
-        "round": 1,
-        "station": "A",
-        "action": "correction",
-        "from_group": 4,
-        "to_group": 1,
-        "ts": "2026-08-06T16:50:55.717Z"
-      },
-      {
-        "round": 1,
-        "station": "A",
-        "action": "move",
-        "from_group": 1,
-        "to_group": 2,
-        "ts": "2026-08-06T16:50:55.717Z"
-      }
-    ]
+    "history": []
   },
   {
     "id": "D044",
@@ -580,7 +478,7 @@
     "wristband_number": 44,
     "qr_code": "D044",
     "home_group": 4,
-    "current_group": 5,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -591,7 +489,7 @@
     "wristband_number": 45,
     "qr_code": "D045",
     "home_group": 5,
-    "current_group": 6,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -602,7 +500,7 @@
     "wristband_number": 46,
     "qr_code": "D046",
     "home_group": 6,
-    "current_group": 7,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -613,27 +511,10 @@
     "wristband_number": 47,
     "qr_code": "D047",
     "home_group": 7,
-    "current_group": 2,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
-    "history": [
-      {
-        "round": 1,
-        "station": "A",
-        "action": "correction",
-        "from_group": 8,
-        "to_group": 1,
-        "ts": "2026-08-06T16:50:52.045Z"
-      },
-      {
-        "round": 1,
-        "station": "A",
-        "action": "move",
-        "from_group": 1,
-        "to_group": 2,
-        "ts": "2026-08-06T16:50:52.045Z"
-      }
-    ]
+    "history": []
   },
   {
     "id": "D048",
@@ -641,7 +522,7 @@
     "wristband_number": 48,
     "qr_code": "D048",
     "home_group": 8,
-    "current_group": 9,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -652,7 +533,7 @@
     "wristband_number": 49,
     "qr_code": "D049",
     "home_group": 9,
-    "current_group": 10,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -663,19 +544,10 @@
     "wristband_number": 50,
     "qr_code": "D050",
     "home_group": 10,
-    "current_group": 2,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
-    "history": [
-      {
-        "round": 1,
-        "station": "A",
-        "action": "move",
-        "from_group": 1,
-        "to_group": 2,
-        "ts": "2026-08-06T16:50:57.814Z"
-      }
-    ]
+    "history": []
   },
   {
     "id": "D051",
@@ -683,7 +555,7 @@
     "wristband_number": 51,
     "qr_code": "D051",
     "home_group": 1,
-    "current_group": 9,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -694,7 +566,7 @@
     "wristband_number": 52,
     "qr_code": "D052",
     "home_group": 2,
-    "current_group": 10,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -705,7 +577,7 @@
     "wristband_number": 53,
     "qr_code": "D053",
     "home_group": 3,
-    "current_group": 1,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -716,7 +588,7 @@
     "wristband_number": 54,
     "qr_code": "D054",
     "home_group": 4,
-    "current_group": 2,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -727,7 +599,7 @@
     "wristband_number": 55,
     "qr_code": "D055",
     "home_group": 5,
-    "current_group": 3,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -738,7 +610,7 @@
     "wristband_number": 56,
     "qr_code": "D056",
     "home_group": 6,
-    "current_group": 4,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -749,27 +621,10 @@
     "wristband_number": 57,
     "qr_code": "D057",
     "home_group": 7,
-    "current_group": 2,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
-    "history": [
-      {
-        "round": 1,
-        "station": "A",
-        "action": "correction",
-        "from_group": 5,
-        "to_group": 1,
-        "ts": "2026-08-06T16:50:59.548Z"
-      },
-      {
-        "round": 1,
-        "station": "A",
-        "action": "move",
-        "from_group": 1,
-        "to_group": 2,
-        "ts": "2026-08-06T16:50:59.548Z"
-      }
-    ]
+    "history": []
   },
   {
     "id": "D058",
@@ -777,7 +632,7 @@
     "wristband_number": 58,
     "qr_code": "D058",
     "home_group": 8,
-    "current_group": 6,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -788,7 +643,7 @@
     "wristband_number": 59,
     "qr_code": "D059",
     "home_group": 9,
-    "current_group": 7,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -799,7 +654,7 @@
     "wristband_number": 60,
     "qr_code": "D060",
     "home_group": 10,
-    "current_group": 8,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -810,7 +665,7 @@
     "wristband_number": 61,
     "qr_code": "D061",
     "home_group": 1,
-    "current_group": 8,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -821,7 +676,7 @@
     "wristband_number": 62,
     "qr_code": "D062",
     "home_group": 2,
-    "current_group": 9,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -832,7 +687,7 @@
     "wristband_number": 63,
     "qr_code": "D063",
     "home_group": 3,
-    "current_group": 10,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -843,19 +698,10 @@
     "wristband_number": 64,
     "qr_code": "D064",
     "home_group": 4,
-    "current_group": 2,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
-    "history": [
-      {
-        "round": 1,
-        "station": "A",
-        "action": "move",
-        "from_group": 1,
-        "to_group": 2,
-        "ts": "2026-08-06T16:51:00.957Z"
-      }
-    ]
+    "history": []
   },
   {
     "id": "D065",
@@ -863,7 +709,7 @@
     "wristband_number": 65,
     "qr_code": "D065",
     "home_group": 5,
-    "current_group": 2,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -874,7 +720,7 @@
     "wristband_number": 66,
     "qr_code": "D066",
     "home_group": 6,
-    "current_group": 3,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -885,7 +731,7 @@
     "wristband_number": 67,
     "qr_code": "D067",
     "home_group": 7,
-    "current_group": 4,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -896,7 +742,7 @@
     "wristband_number": 68,
     "qr_code": "D068",
     "home_group": 8,
-    "current_group": 5,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -907,7 +753,7 @@
     "wristband_number": 69,
     "qr_code": "D069",
     "home_group": 9,
-    "current_group": 6,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -918,7 +764,7 @@
     "wristband_number": 70,
     "qr_code": "D070",
     "home_group": 10,
-    "current_group": 7,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -929,27 +775,10 @@
     "wristband_number": 71,
     "qr_code": "D071",
     "home_group": 1,
-    "current_group": 1,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
-    "history": [
-      {
-        "round": 1,
-        "station": "A",
-        "action": "correction",
-        "from_group": 7,
-        "to_group": 1,
-        "ts": "2026-08-06T16:51:02.545Z"
-      },
-      {
-        "round": 1,
-        "station": "A",
-        "action": "home",
-        "from_group": 1,
-        "to_group": 1,
-        "ts": "2026-08-06T16:51:02.545Z"
-      }
-    ]
+    "history": []
   },
   {
     "id": "D072",
@@ -957,7 +786,7 @@
     "wristband_number": 72,
     "qr_code": "D072",
     "home_group": 2,
-    "current_group": 8,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -968,7 +797,7 @@
     "wristband_number": 73,
     "qr_code": "D073",
     "home_group": 3,
-    "current_group": 9,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -979,7 +808,7 @@
     "wristband_number": 74,
     "qr_code": "D074",
     "home_group": 4,
-    "current_group": 10,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -990,7 +819,7 @@
     "wristband_number": 75,
     "qr_code": "D075",
     "home_group": 5,
-    "current_group": 1,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -1001,7 +830,7 @@
     "wristband_number": 76,
     "qr_code": "D076",
     "home_group": 6,
-    "current_group": 2,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -1012,27 +841,10 @@
     "wristband_number": 77,
     "qr_code": "D077",
     "home_group": 7,
-    "current_group": 2,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
-    "history": [
-      {
-        "round": 1,
-        "station": "A",
-        "action": "correction",
-        "from_group": 3,
-        "to_group": 1,
-        "ts": "2026-08-06T16:51:10.660Z"
-      },
-      {
-        "round": 1,
-        "station": "A",
-        "action": "move",
-        "from_group": 1,
-        "to_group": 2,
-        "ts": "2026-08-06T16:51:10.660Z"
-      }
-    ]
+    "history": []
   },
   {
     "id": "D078",
@@ -1040,27 +852,10 @@
     "wristband_number": 78,
     "qr_code": "D078",
     "home_group": 8,
-    "current_group": 2,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
-    "history": [
-      {
-        "round": 1,
-        "station": "A",
-        "action": "correction",
-        "from_group": 4,
-        "to_group": 1,
-        "ts": "2026-08-06T16:51:07.598Z"
-      },
-      {
-        "round": 1,
-        "station": "A",
-        "action": "move",
-        "from_group": 1,
-        "to_group": 2,
-        "ts": "2026-08-06T16:51:07.598Z"
-      }
-    ]
+    "history": []
   },
   {
     "id": "D079",
@@ -1068,7 +863,7 @@
     "wristband_number": 79,
     "qr_code": "D079",
     "home_group": 9,
-    "current_group": 5,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -1079,7 +874,7 @@
     "wristband_number": 80,
     "qr_code": "D080",
     "home_group": 10,
-    "current_group": 6,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -1090,7 +885,7 @@
     "wristband_number": 81,
     "qr_code": "D081",
     "home_group": 1,
-    "current_group": 6,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -1101,7 +896,7 @@
     "wristband_number": 82,
     "qr_code": "D082",
     "home_group": 2,
-    "current_group": 7,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -1112,7 +907,7 @@
     "wristband_number": 83,
     "qr_code": "D083",
     "home_group": 3,
-    "current_group": 8,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -1123,7 +918,7 @@
     "wristband_number": 84,
     "qr_code": "D084",
     "home_group": 4,
-    "current_group": 9,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -1134,7 +929,7 @@
     "wristband_number": 85,
     "qr_code": "D085",
     "home_group": 5,
-    "current_group": 10,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -1145,7 +940,7 @@
     "wristband_number": 86,
     "qr_code": "D086",
     "home_group": 6,
-    "current_group": 1,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -1156,7 +951,7 @@
     "wristband_number": 87,
     "qr_code": "D087",
     "home_group": 7,
-    "current_group": 2,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -1167,7 +962,7 @@
     "wristband_number": 88,
     "qr_code": "D088",
     "home_group": 8,
-    "current_group": 3,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -1178,7 +973,7 @@
     "wristband_number": 89,
     "qr_code": "D089",
     "home_group": 9,
-    "current_group": 4,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -1189,7 +984,7 @@
     "wristband_number": 90,
     "qr_code": "D090",
     "home_group": 10,
-    "current_group": 5,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -1200,7 +995,7 @@
     "wristband_number": 91,
     "qr_code": "D091",
     "home_group": 1,
-    "current_group": 5,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -1211,27 +1006,10 @@
     "wristband_number": 92,
     "qr_code": "D092",
     "home_group": 2,
-    "current_group": 2,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
-    "history": [
-      {
-        "round": 1,
-        "station": "A",
-        "action": "correction",
-        "from_group": 6,
-        "to_group": 1,
-        "ts": "2026-08-06T16:51:12.493Z"
-      },
-      {
-        "round": 1,
-        "station": "A",
-        "action": "move",
-        "from_group": 1,
-        "to_group": 2,
-        "ts": "2026-08-06T16:51:12.493Z"
-      }
-    ]
+    "history": []
   },
   {
     "id": "D093",
@@ -1239,7 +1017,7 @@
     "wristband_number": 93,
     "qr_code": "D093",
     "home_group": 3,
-    "current_group": 7,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -1250,7 +1028,7 @@
     "wristband_number": 94,
     "qr_code": "D094",
     "home_group": 4,
-    "current_group": 8,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -1261,7 +1039,7 @@
     "wristband_number": 95,
     "qr_code": "D095",
     "home_group": 5,
-    "current_group": 9,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -1272,7 +1050,7 @@
     "wristband_number": 96,
     "qr_code": "D096",
     "home_group": 6,
-    "current_group": 10,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -1283,7 +1061,7 @@
     "wristband_number": 97,
     "qr_code": "D097",
     "home_group": 7,
-    "current_group": 1,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -1294,7 +1072,7 @@
     "wristband_number": 98,
     "qr_code": "D098",
     "home_group": 8,
-    "current_group": 2,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -1305,7 +1083,7 @@
     "wristband_number": 99,
     "qr_code": "D099",
     "home_group": 9,
-    "current_group": 3,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -1316,7 +1094,7 @@
     "wristband_number": 100,
     "qr_code": "D100",
     "home_group": 10,
-    "current_group": 4,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -1327,7 +1105,7 @@
     "wristband_number": 101,
     "qr_code": "D101",
     "home_group": 1,
-    "current_group": 4,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -1338,7 +1116,7 @@
     "wristband_number": 102,
     "qr_code": "D102",
     "home_group": 2,
-    "current_group": 5,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -1349,7 +1127,7 @@
     "wristband_number": 103,
     "qr_code": "D103",
     "home_group": 3,
-    "current_group": 6,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -1360,7 +1138,7 @@
     "wristband_number": 104,
     "qr_code": "D104",
     "home_group": 4,
-    "current_group": 7,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -1371,7 +1149,7 @@
     "wristband_number": 105,
     "qr_code": "D105",
     "home_group": 5,
-    "current_group": 8,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []
@@ -1382,7 +1160,7 @@
     "wristband_number": 106,
     "qr_code": "D106",
     "home_group": 6,
-    "current_group": 9,
+    "current_group": null,
     "rounds_in_wrong_group": 0,
     "bait_delay": null,
     "history": []

@@ -1,0 +1,16 @@
+# Čo sa NIKDY nesmie dostať na Vercel.
+#
+# certs/ obsahuje PRIVÁTNE KĽÚČE (key.pem, ca-key.pem). Na Vercele nie sú
+# potrebné (hosting má vlastný dôveryhodný certifikát) a keby sa nahrali,
+# hrozilo by ich stiahnutie cez statické servovanie.
+certs/
+
+# Lokálne dáta hry. Na Vercele je stav v KV, tieto súbory by boli mätúce
+# a mohli by obsahovať mená detí.
+data/
+
+# Vývojové veci, ktoré na hostingu nemajú čo robiť.
+test/
+scripts/
+node_modules/
+.DS_Store

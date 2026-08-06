@@ -3,7 +3,60 @@
 Logistická appka na správu rozdeľovacej hry: 10 skupín, 10 stanovíšť (A–J v kruhu),
 deti s QR náramkami sa postupne „rozdeľujú“ do svojich domovských skupín.
 
-## Spustenie
+## Kde to beží
+
+Appka vie bežať dvoma spôsobmi a prepína sa sama podľa premenných prostredia:
+
+| režim | úložisko | kedy použiť |
+|---|---|---|
+| **lokálne** (default) | JSON súbory v `data/` | tábor bez internetu — notebook v lokálnej WiFi |
+| **Vercel** | Vercel KV / Upstash Redis | keď je na mieste internet |
+
+Hlavný rozdiel z pohľadu animátora: na Vercele má stránka **dôveryhodný
+certifikát**, takže kamera funguje hneď a netreba nič inštalovať do telefónov.
+Lokálne treba raz na každý telefón nainštalovať certifikát (viď nižšie).
+
+Lokálny režim ale beží aj bez internetu — ak vypadne signál, hra pokračuje.
+Na Vercele sa pri výpadku skenovanie zastaví.
+
+## Nasadenie na Vercel
+
+1. Nahraj projekt do gitu a naimportuj ho na Vercel (framework: **Other**,
+   žiadny build command — je to nastavené vo `vercel.json`).
+2. V projekte: **Storage → Create → Upstash Redis** a priraď ho k projektu.
+   Vercel doplní premenné `KV_REST_API_URL` a `KV_REST_API_TOKEN`; appka si
+   ich nájde sama a prepne sa do KV režimu.
+3. Deploy. Skener je na `https://<tvoj-projekt>.vercel.app/scan.html`.
+4. Deti naimportuj cez **Nastavenia** priamo na hostingu. Ak ich máš už
+   lokálne v `data/`, vieš ich nahrať jedným príkazom:
+
+```bash
+KV_REST_API_URL=... KV_REST_API_TOKEN=... npm run push-to-kv
+```
+
+**Čo je kde:** `api/[...path].js` je vstupný bod pre Vercel, `server.js` pre
+lokálne spustenie — obidva používajú to isté routovanie z `lib/handler.js`.
+`.vercelignore` zabraňuje nahraniu `certs/` (privátne kľúče!) a `data/`.
+
+### Súbežnosť (dôležité)
+
+Lokálne je Node jednovláknový a celá herná logika je synchrónna, takže
+čítaj-uprav-zapíš dobehne bez prerušenia. Na Vercele obsluhuje jedna inštancia
+viac požiadaviek naraz a inštancií môže bežať viac — dvaja animátori skenujúci
+v tej istej sekunde by si inak prepísali zápis a jeden sken by zmizol.
+
+Preto v KV režime beží každá požiadavka ako transakcia (`store.runTransaction`):
+načíta sa celý stav, herná logika ho synchrónne upraví v pamäti (kontext je
+oddelený cez `AsyncLocalStorage`) a zapíše sa jedným atomickým
+compare-and-swap zápisom. Keď medzitým zapísal niekto iný, zápis neprejde
+a celá požiadavka sa zopakuje nad čerstvými dátami (max 6 pokusov, potom
+animátor dostane zrozumiteľnú hlášku „skús ešte raz“).
+
+Testuje to `test/store.test.js` proti falošnému Redisu: 10 súbežných skenov,
+z toho väčšina musí zápis opakovať, a napriek tomu sa žiadny nestratí ani
+nezduplikuje.
+
+## Spustenie lokálne
 
 ```bash
 node server.js
