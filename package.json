@@ -1,0 +1,12 @@
+{
+  "name": "lpt2-rozdelovacia-hra",
+  "version": "1.0.0",
+  "description": "Správa rozdeľovacej hry pre LPT2 (doobedňajší program) — bez závislostí, beží lokálne.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "certs": "bash scripts/gen-certs.sh",
+    "test": "node test/game.test.js && node test/simulacia.test.js",
+    "simulacia": "node test/simulacia.test.js"
+  }
+}

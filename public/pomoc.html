@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Nastavenie telefónu — LPT2</title>
+  <link rel="stylesheet" href="scan.css">
+  <style>
+    /* Stránka je textová, preto trochu iné odsadenia než skener. */
+    .glass { padding: 20px; }
+    .glass h2 { margin: 0 0 12px; font-size: 1.05rem; font-weight: 800; text-transform: uppercase;
+                letter-spacing: 0.05em; color: var(--fialova); }
+    .glass ol { margin: 0; padding-left: 20px; line-height: 1.55; color: #33203c; }
+    .glass li { margin-bottom: 9px; }
+    .glass p { line-height: 1.5; color: #33203c; }
+    .stav { display: flex; align-items: center; gap: 10px; font-weight: 800; margin-bottom: 12px; }
+    .bodka { width: 14px; height: 14px; border-radius: 50%; flex: none; }
+    .bodka.ok { background: var(--zelena); }
+    .bodka.zle { background: var(--cervena); }
+    .url { word-break: break-all; font-weight: 800; color: var(--fialova-tmava); }
+    #qr { display: flex; justify-content: center; padding: 14px; background: #fff; border-radius: 18px; }
+    #qr img, #qr canvas { display: block; }
+  </style>
+</head>
+<body>
+  <img class="brand-logo" src="design/logo.png" alt="HeyPay">
+
+  <main class="wrap">
+    <section class="glass">
+      <h1 class="title">Nastavenie</h1>
+      <div id="stav-kamera" class="stav"></div>
+      <div id="stav-adresa" class="stav"></div>
+      <p id="stav-popis" style="margin-bottom:0"></p>
+    </section>
+
+    <section class="glass" id="krok-cert">
+      <h2>1. Nainštaluj certifikát</h2>
+      <p>Bez toho telefón serveru neverí a <strong>nepustí kameru</strong>. Robí sa to raz na každom telefóne.</p>
+      <a class="btn btn-gold" id="btn-cert" href="/ca.crt" style="text-decoration:none">Stiahnuť certifikát</a>
+
+      <h2 style="margin-top:20px">iPhone</h2>
+      <ol>
+        <li>Klikni na tlačidlo vyššie → Safari sa spýta, či povoliť stiahnutie profilu → <strong>Povoliť</strong>.</li>
+        <li>Otvor <strong>Nastavenia</strong> → hore sa objaví <strong>Profil prevzatý</strong> → otvor a daj <strong>Inštalovať</strong> (vpravo hore).</li>
+        <li>Zadaj kód telefónu a potvrď <strong>Inštalovať</strong>.</li>
+        <li>Choď do <strong>Nastavenia → Všeobecné → Info → Nastavenia dôvery certifikátov</strong>
+            a zapni prepínač pri <strong>LPT2 tabor CA</strong>. Tento krok sa nesmie vynechať.</li>
+      </ol>
+
+      <h2>Android</h2>
+      <ol>
+        <li>Klikni na tlačidlo vyššie — súbor sa stiahne.</li>
+        <li>Otvor <strong>Nastavenia → Zabezpečenie → Ďalšie nastavenia → Šifrovanie a poverenia →
+            Inštalovať certifikát → Certifikát CA</strong>, potvrď varovanie a vyber stiahnutý súbor.</li>
+        <li>Na niektorých telefónoch stačí ťuknúť na stiahnutý súbor a vybrať <strong>Certifikát CA</strong>.</li>
+      </ol>
+    </section>
+
+    <section class="glass">
+      <h2>2. Otvor skener</h2>
+      <p>Na skenovanie používaj <strong>vždy</strong> túto adresu (je zabezpečená):</p>
+      <p class="url" id="scan-url">—</p>
+      <div id="qr"></div>
+      <p style="margin-bottom:0">Ostatné telefóny ju môžu naskenovať z tohto QR kódu.</p>
+      <a class="btn btn-gold" href="scan.html" style="text-decoration:none; margin-top:12px">Prejsť na skener</a>
+    </section>
+
+    <section class="glass">
+      <h2>Keď kamera aj tak nejde</h2>
+      <ol>
+        <li>Skontroluj, že adresa začína <strong>https://</strong> a nie http://.</li>
+        <li>Skontroluj, že si spravil(a) aj krok so <strong>zapnutím dôvery</strong> (iPhone, bod 4).</li>
+        <li>Zavri fotoaparát a iné appky, ktoré môžu držať kameru.</li>
+        <li>V Safari: ikonka <strong>AA</strong> v adresnom riadku → Nastavenia webu → Kamera → <strong>Povoliť</strong>.</li>
+        <li>Núdzovo sa dá kód z náramku zadať v skeneri aj <strong>ručne</strong> — hra beží ďalej.</li>
+      </ol>
+    </section>
+  </main>
+
+  <script src="vendor/qrcode.min.js"></script>
+  <script src="common.js"></script>
+  <script>
+    function bodka(ok, text) {
+      return `<span class="bodka ${ok ? 'ok' : 'zle'}"></span><span>${text}</span>`;
+    }
+
+    (async () => {
+      const zabezpecene = !!window.isSecureContext;
+      const maKameru = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+      el('stav-adresa').innerHTML = bodka(zabezpecene,
+        zabezpecene ? 'Adresa je zabezpečená' : 'Adresa NIE je zabezpečená (' + location.protocol + ')');
+      el('stav-kamera').innerHTML = bodka(maKameru && zabezpecene,
+        maKameru && zabezpecene ? 'Prehliadač kameru povolí' : 'Prehliadač kameru zablokuje');
+      el('stav-popis').textContent = (maKameru && zabezpecene)
+        ? 'Všetko je nastavené — môžeš prejsť na skener. Pri prvom skenovaní ešte telefón raz spýta na povolenie kamery.'
+        : 'Postupuj podľa krokov nižšie. Bez certifikátu telefón kameru nepustí.';
+
+      // Odporúčaná https adresa + QR kód na ňu.
+      let url = location.origin.replace(/^http:/, 'https:') + '/scan.html';
+      try {
+        const info = await api('/api/server-info');
+        if (info && info.https_enabled) {
+          const host = location.hostname;
+          url = `https://${host}:${info.https_port}/scan.html`;
+          if (!info.addresses.includes(host) && info.addresses.length) {
+            url = `https://${info.addresses[0]}:${info.https_port}/scan.html`;
+          }
+        }
+      } catch (e) { /* ostane odhad z aktuálnej adresy */ }
+      el('scan-url').textContent = url;
+      new QRCode(el('qr'), { text: url, width: 190, height: 190, correctLevel: QRCode.CorrectLevel.M });
+    })();
+  </script>
+</body>
+</html>

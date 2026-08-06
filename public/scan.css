@@ -1,0 +1,359 @@
+/* Dizajn skenovacej stránky (Aladin / LPT2 2026).
+   Platí LEN pre scan.html — admin a nastavenia ostávajú na style.css.
+
+   Podklady v design/ sú vyrezané z dodaného SVG mocku:
+     bg.jpg   gradient + dym (1080×1920)
+     lamp.png lampa vľavo dole
+     logo.png HeyPay logo vpravo hore
+   Spolu ~117 kB, takže sa načítajú aj cez slabú táborovú WiFi. */
+
+:root {
+  --fialova: #84309c;
+  --fialova-tmava: #5d1f70;
+  --zlta: #fbcf35;
+  --zlta-tmava: #e0b41a;
+  --zelena: #1e8449;
+  --cervena: #c0392b;
+  --siva: #6b6b6b;
+  --sklo: rgba(255, 255, 255, 0.26);
+  --sklo-okraj: rgba(255, 255, 255, 0.5);
+  --radius: 26px;
+  --font: "Avenir Next", "Helvetica Neue", -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, "Noto Sans", sans-serif;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font);
+  color: #2b2b2b;
+  /* Gradient priamo na body je záloha, keby sa fotka nestihla načítať. */
+  background: linear-gradient(200deg, #fdd82d 0%, #e67b6e 42%, #c14b8f 70%, #7d2e9b 100%);
+  /* Horný odsadok drží obsah pod logom HeyPay, dolný nad lampou. */
+  padding: calc(74px + env(safe-area-inset-top)) 14px
+           calc(104px + env(safe-area-inset-bottom));
+}
+
+/* Fotka pozadia ako fixná vrstva — spoľahlivejšie než
+   background-attachment: fixed, ktorý na iOS Safari zlyháva. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: url("design/bg.jpg") center / cover no-repeat;
+  z-index: -1;
+}
+
+/* Lampa vľavo dole a logo vpravo hore — dekorácia, neovplyvňuje layout. */
+body::after {
+  content: "";
+  position: fixed;
+  left: -4px;
+  bottom: 0;
+  width: 118px;
+  height: 87px;
+  background: url("design/lamp.png") left bottom / contain no-repeat;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Absolútne (nie fixed) — pri skrolovaní odíde s obsahom, inak by sa
+   prekrývalo s tlačidlom v hornej lište skenera. */
+.brand-logo {
+  position: absolute;
+  top: max(10px, env(safe-area-inset-top));
+  right: 12px;
+  width: 58px;
+  height: 58px;
+  pointer-events: none;
+  z-index: 2;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.18));
+}
+
+.wrap {
+  position: relative;
+  z-index: 1;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+/* --- Sklenené karty ------------------------------------------------------ */
+
+.glass {
+  background: rgba(255, 255, 255, 0.42);
+  border: 1px solid var(--sklo-okraj);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin: 0 0 14px;
+  box-shadow: 0 8px 26px rgba(70, 20, 90, 0.16);
+}
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .glass {
+    background: var(--sklo);
+    -webkit-backdrop-filter: blur(16px) saturate(1.2);
+    backdrop-filter: blur(16px) saturate(1.2);
+  }
+}
+
+/* --- Typografia ---------------------------------------------------------- */
+
+.title {
+  margin: 4px 0 10px;
+  font-size: clamp(2.1rem, 11vw, 3rem);
+  font-weight: 900;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--fialova);
+  text-shadow: 0 2px 0 rgba(255, 255, 255, 0.45), 0 6px 18px rgba(70, 20, 90, 0.25);
+}
+
+.lead { margin: 0 0 16px; font-size: 0.95rem; line-height: 1.4; color: #4a3550; }
+.hint { margin: 10px 2px 16px; font-size: 0.88rem; color: #4a3550; min-height: 1.2em; }
+.footnote {
+  margin: 10px 4px 0;
+  font-size: 0.85rem;
+  line-height: 1.35;
+  color: #fff;
+  text-shadow: 0 1px 6px rgba(70, 20, 90, 0.65);
+  text-align: center;
+}
+
+.section-title {
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fialova);
+}
+.section-title .count {
+  display: inline-block;
+  min-width: 26px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--fialova);
+  color: #fff;
+  text-align: center;
+}
+
+/* --- Tlačidlá ------------------------------------------------------------ */
+
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 56px;
+  padding: 14px 18px;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  font-family: inherit;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.08s ease, filter 0.15s ease;
+}
+.btn:active { transform: scale(0.975); }
+.btn:disabled { opacity: 0.45; cursor: default; }
+
+/* Priehľadné (ghost) — ako v mocku: fialová priesvitná výplň, biely text. */
+.btn-ghost {
+  background: rgba(132, 48, 156, 0.34);
+  border-color: rgba(132, 48, 156, 0.75);
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(50, 12, 65, 0.5);
+}
+.btn-ghost:not(:disabled):hover { background: rgba(132, 48, 156, 0.48); }
+
+/* Zlaté — hlavná akcia. */
+.btn-gold {
+  background: var(--zlta);
+  border-color: rgba(255, 255, 255, 0.65);
+  color: var(--fialova);
+  box-shadow: 0 6px 18px rgba(120, 80, 0, 0.28);
+}
+.btn-gold:not(:disabled):hover { filter: brightness(1.04); }
+
+.btn-sm {
+  width: auto;
+  min-height: 44px;
+  padding: 8px 18px;
+  font-size: 0.85rem;
+  border-radius: 999px;
+}
+
+.btn-row { display: flex; gap: 10px; margin-top: 12px; }
+.btn-row .btn {
+  flex: 1;
+  min-width: 0;
+  min-height: 50px;
+  font-size: 0.92rem;
+  letter-spacing: 0.03em;
+  white-space: nowrap; /* nech sa popis nezalomí do dvoch riadkov */
+}
+
+/* --- Formulárové prvky --------------------------------------------------- */
+
+.field { display: block; margin-bottom: 12px; }
+.field-label {
+  display: block;
+  margin: 0 0 6px 4px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fialova-tmava);
+}
+select, input[type="text"], input:not([type]) {
+  width: 100%;
+  min-height: 54px;
+  padding: 12px 16px;
+  border-radius: 18px;
+  border: 2px solid rgba(132, 48, 156, 0.35);
+  background: rgba(255, 255, 255, 0.92);
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #33203c;
+  appearance: none;
+  -webkit-appearance: none;
+}
+select {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath fill='%2384309c' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 18px center;
+  background-size: 12px 8px;
+  padding-right: 42px;
+}
+select:focus, input:focus { outline: 3px solid rgba(251, 207, 53, 0.85); outline-offset: 1px; }
+
+/* --- Horná lišta v skeneri ----------------------------------------------- */
+
+.topbar { display: flex; align-items: center; gap: 12px; padding: 14px 14px 14px 18px; }
+.topbar .grow { flex: 1; min-width: 0; }
+.topbar .station {
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--fialova);
+  line-height: 1.25;
+}
+.topbar .meta { margin-top: 2px; font-size: 0.85rem; color: #4a3550; font-weight: 600; }
+
+/* --- Výsledok skenu ------------------------------------------------------
+   Funkčný signál pre animátora na priamom slnku — plná sýta farba a veľké
+   písmo majú prednosť pred priesvitným sklom. */
+
+#scan-result { display: none; margin: 0 0 14px; padding: 20px 18px; border-radius: var(--radius); text-align: center; color: #fff; }
+#scan-result.home, #scan-result.bait { display: block; background: var(--zelena); box-shadow: 0 8px 24px rgba(30, 132, 73, 0.4); }
+#scan-result.move { display: block; background: var(--cervena); box-shadow: 0 8px 24px rgba(192, 57, 43, 0.4); }
+#scan-result.error { display: block; background: #4d4d4d; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3); }
+#scan-result .big-name {
+  font-size: 1.5rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  line-height: 1.15;
+}
+#scan-result .verdict { margin-top: 8px; font-size: 1.15rem; font-weight: 800; }
+
+/* --- Kamera -------------------------------------------------------------- */
+
+.scanner-card { padding: 14px; }
+#reader {
+  width: 100%;
+  border-radius: 18px;
+  overflow: hidden;
+  background: rgba(60, 25, 75, 0.35);
+  min-height: 120px;
+}
+#reader video, #reader canvas { width: 100% !important; height: auto !important; display: block; }
+#reader img { max-width: 100%; }
+.cam-note { margin: 10px 2px 0; font-size: 0.85rem; line-height: 1.35; color: #4a3550; }
+.cam-note strong { color: var(--fialova-tmava); }
+
+.manual { display: flex; gap: 10px; margin-top: 12px; }
+.manual input { flex: 1; min-width: 0; }
+
+/* --- Zoznam naskenovaných ------------------------------------------------ */
+
+.list { font-size: 0.95rem; }
+.list .empty { color: #4a3550; }
+.list-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 2px;
+  border-bottom: 1px solid rgba(132, 48, 156, 0.16);
+  font-weight: 600;
+  color: #33203c;
+}
+.list-item:last-child { border-bottom: 0; }
+.list-item .nm { flex: 1; min-width: 0; }
+.tag {
+  flex: none;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #fff;
+}
+.tag.green { background: var(--zelena); }
+.tag.red { background: var(--cervena); }
+
+/* --- Offline upozornenie -------------------------------------------------- */
+
+#offline-banner {
+  display: none;
+  position: relative;
+  z-index: 3;
+  max-width: 520px;
+  margin: 0 auto 12px;
+  padding: 14px;
+  border-radius: 18px;
+  background: var(--cervena);
+  color: #fff;
+  font-weight: 800;
+  text-align: center;
+  box-shadow: 0 6px 20px rgba(192, 57, 43, 0.45);
+}
+
+/* Upozornenie, že na tejto adrese kamera nepôjde (http:// alebo
+   nedôveryhodný certifikát) — vrátane odkazu na riešenie. */
+#env-banner {
+  display: none;
+  position: relative;
+  z-index: 3;
+  max-width: 520px;
+  margin: 0 auto 12px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: #b9770e;
+  color: #fff;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  box-shadow: 0 6px 20px rgba(120, 76, 10, 0.4);
+}
+#env-banner code {
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.22);
+  font-size: 0.9em;
+}
+.env-link {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  background: var(--zlta);
+  color: var(--fialova) !important;
+  font-weight: 800;
+  text-decoration: none;
+}

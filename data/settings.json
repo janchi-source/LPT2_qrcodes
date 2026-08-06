@@ -1,0 +1,75 @@
+{
+  "num_groups": 10,
+  "max_rounds": 10,
+  "stations": [
+    {
+      "letter": "A",
+      "name": "Vymenia sa všetci tí",
+      "place": "zasadačka"
+    },
+    {
+      "letter": "B",
+      "name": "Vajco",
+      "place": "záhrada"
+    },
+    {
+      "letter": "C",
+      "name": "Deka",
+      "place": "pri Panne Márii"
+    },
+    {
+      "letter": "D",
+      "name": "Telefón",
+      "place": "obývačka"
+    },
+    {
+      "letter": "E",
+      "name": "Červené more",
+      "place": "mantinely"
+    },
+    {
+      "letter": "F",
+      "name": "Kreslenie",
+      "place": "oľga"
+    },
+    {
+      "letter": "G",
+      "name": "Rómeo a Júlia",
+      "place": "sála"
+    },
+    {
+      "letter": "H",
+      "name": "Zoradenie",
+      "place": "pred skautskou"
+    },
+    {
+      "letter": "I",
+      "name": "Pantomíma",
+      "place": "tanečná"
+    },
+    {
+      "letter": "J",
+      "name": "Hádaj na čo myslím",
+      "place": "čajovňa"
+    }
+  ],
+  "group_start_station": {
+    "1": "A",
+    "2": "B",
+    "3": "C",
+    "4": "D",
+    "5": "E",
+    "6": "F",
+    "7": "G",
+    "8": "H",
+    "9": "I",
+    "10": "J"
+  },
+  "bait": {
+    "mode": "fixed",
+    "delay_rounds": 1,
+    "random_min": 0,
+    "random_max": 2
+  },
+  "force_home_round": 10
+}

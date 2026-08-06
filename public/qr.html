@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QR kódy — LPT2</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="no-print">
+    <h1>QR kódy detí <a href="index.html" style="font-size:0.8rem">← domov</a></h1>
+    <p class="muted">Každá karta = QR kód s ID dieťaťa (na náramok). Tlač cez Ctrl/Cmd+P.</p>
+    <button class="primary" onclick="window.print()">🖨 Tlačiť</button>
+  </div>
+  <div id="cards"></div>
+
+  <script src="vendor/qrcode.min.js"></script>
+  <script src="common.js"></script>
+  <script>
+    (async () => {
+      const s = await api('/api/state');
+      if (s.error && !s.children) { el('cards').textContent = 'Server nedostupný.'; return; }
+      const kids = s.children.sort((a, b) => (a.wristband_number || 0) - (b.wristband_number || 0));
+      if (!kids.length) { el('cards').innerHTML = '<p>Žiadne deti — pridaj ich v <a href="settings.html">Nastaveniach</a>.</p>'; return; }
+      for (const c of kids) {
+        const card = document.createElement('div');
+        card.className = 'qr-card';
+        const qrDiv = document.createElement('div');
+        card.appendChild(qrDiv);
+        const label = document.createElement('div');
+        label.innerHTML = `<strong>#${c.wristband_number ?? ''}</strong> ${esc(c.name)}<br><span class="muted">${esc(c.qr_code)}</span>`;
+        card.appendChild(label);
+        el('cards').appendChild(card);
+        new QRCode(qrDiv, { text: c.qr_code, width: 140, height: 140, correctLevel: QRCode.CorrectLevel.M });
+      }
+    })();
+  </script>
+</body>
+</html>

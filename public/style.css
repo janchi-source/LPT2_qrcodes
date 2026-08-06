@@ -1,0 +1,69 @@
+/* Minimalistické štýly — funkčnosť nad vzhľadom, dizajn sa dorobí neskôr. */
+* { box-sizing: border-box; }
+body {
+  font-family: -apple-system, system-ui, sans-serif;
+  margin: 0;
+  padding: 12px;
+  background: #f5f5f5;
+  color: #222;
+}
+h1 { font-size: 1.3rem; margin: 8px 0; }
+h2 { font-size: 1.1rem; margin: 16px 0 8px; }
+a { color: #0055cc; }
+button {
+  font-size: 1rem;
+  padding: 10px 14px;
+  border: 1px solid #999;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+}
+button.primary { background: #0055cc; color: #fff; border-color: #0055cc; }
+button.danger { background: #c0392b; color: #fff; border-color: #c0392b; }
+button.big { width: 100%; padding: 16px; font-size: 1.15rem; margin: 8px 0; }
+input, select {
+  font-size: 1rem;
+  padding: 8px;
+  border: 1px solid #999;
+  border-radius: 6px;
+  background: #fff;
+}
+table { border-collapse: collapse; width: 100%; background: #fff; font-size: 0.9rem; }
+th, td { border: 1px solid #ddd; padding: 6px 8px; text-align: left; }
+th { background: #eee; position: sticky; top: 0; }
+.card { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 12px; margin: 10px 0; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.grow { flex: 1; }
+.muted { color: #777; font-size: 0.85rem; }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem; }
+.tag.green { background: #d4efdf; color: #1e7a45; }
+.tag.red { background: #fadbd8; color: #a93226; }
+.tag.orange { background: #fdebd0; color: #b9770e; }
+.tag.gray { background: #e5e5e5; color: #555; }
+
+/* Výsledok skenu — veľký banner, viditeľný na slnku */
+#scan-result { border-radius: 10px; padding: 18px; margin: 10px 0; text-align: center; display: none; }
+#scan-result.home { display: block; background: #27ae60; color: #fff; }
+#scan-result.bait { display: block; background: #27ae60; color: #fff; }
+#scan-result.move { display: block; background: #c0392b; color: #fff; }
+#scan-result.error { display: block; background: #7f8c8d; color: #fff; }
+#scan-result .big-name { font-size: 1.4rem; font-weight: 700; }
+#scan-result .verdict { font-size: 1.2rem; margin-top: 6px; }
+
+#reader { width: 100%; max-width: 480px; margin: 0 auto; }
+#offline-banner {
+  display: none;
+  background: #c0392b; color: #fff;
+  padding: 10px; border-radius: 6px; margin: 8px 0; text-align: center;
+}
+tr.highlight-red { background: #fadbd8; }
+tr.highlight-orange { background: #fdebd0; }
+.qr-card {
+  display: inline-block; border: 1px solid #000; border-radius: 6px;
+  padding: 10px; margin: 6px; text-align: center; background: #fff;
+  page-break-inside: avoid;
+}
+@media print {
+  body { background: #fff; }
+  .no-print { display: none !important; }
+}

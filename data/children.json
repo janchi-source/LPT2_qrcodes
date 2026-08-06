@@ -1,0 +1,1390 @@
+[
+  {
+    "id": "D001",
+    "name": "TEST Anička 1",
+    "wristband_number": 1,
+    "qr_code": "D001",
+    "home_group": 1,
+    "current_group": 1,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": [
+      {
+        "round": 1,
+        "station": "A",
+        "action": "correction",
+        "from_group": 6,
+        "to_group": 1,
+        "ts": "2026-08-06T16:49:48.621Z"
+      },
+      {
+        "round": 1,
+        "station": "A",
+        "action": "home",
+        "from_group": 1,
+        "to_group": 1,
+        "ts": "2026-08-06T16:49:48.621Z"
+      }
+    ]
+  },
+  {
+    "id": "D002",
+    "name": "TEST Miško 2",
+    "wristband_number": 2,
+    "qr_code": "D002",
+    "home_group": 2,
+    "current_group": 2,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": [
+      {
+        "round": 1,
+        "station": "A",
+        "action": "correction",
+        "from_group": 7,
+        "to_group": 1,
+        "ts": "2026-08-06T16:49:54.374Z"
+      },
+      {
+        "round": 1,
+        "station": "A",
+        "action": "move",
+        "from_group": 1,
+        "to_group": 2,
+        "ts": "2026-08-06T16:49:54.374Z"
+      }
+    ]
+  },
+  {
+    "id": "D003",
+    "name": "TEST Zuzka 3",
+    "wristband_number": 3,
+    "qr_code": "D003",
+    "home_group": 3,
+    "current_group": 2,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": [
+      {
+        "round": 1,
+        "station": "A",
+        "action": "correction",
+        "from_group": 8,
+        "to_group": 1,
+        "ts": "2026-08-06T16:49:56.998Z"
+      },
+      {
+        "round": 1,
+        "station": "A",
+        "action": "move",
+        "from_group": 1,
+        "to_group": 2,
+        "ts": "2026-08-06T16:49:56.998Z"
+      }
+    ]
+  },
+  {
+    "id": "D004",
+    "name": "TEST Tomáš 4",
+    "wristband_number": 4,
+    "qr_code": "D004",
+    "home_group": 4,
+    "current_group": 9,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D005",
+    "name": "TEST Katka 5",
+    "wristband_number": 5,
+    "qr_code": "D005",
+    "home_group": 5,
+    "current_group": 10,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D006",
+    "name": "TEST Lukáš 6",
+    "wristband_number": 6,
+    "qr_code": "D006",
+    "home_group": 6,
+    "current_group": 1,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D007",
+    "name": "TEST Ema 7",
+    "wristband_number": 7,
+    "qr_code": "D007",
+    "home_group": 7,
+    "current_group": 2,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D008",
+    "name": "TEST Samko 8",
+    "wristband_number": 8,
+    "qr_code": "D008",
+    "home_group": 8,
+    "current_group": 3,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D009",
+    "name": "TEST Nina 9",
+    "wristband_number": 9,
+    "qr_code": "D009",
+    "home_group": 9,
+    "current_group": 4,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D010",
+    "name": "TEST Adam 10",
+    "wristband_number": 10,
+    "qr_code": "D010",
+    "home_group": 10,
+    "current_group": 2,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": [
+      {
+        "round": 1,
+        "station": "A",
+        "action": "correction",
+        "from_group": 5,
+        "to_group": 1,
+        "ts": "2026-08-06T16:50:47.967Z"
+      },
+      {
+        "round": 1,
+        "station": "A",
+        "action": "move",
+        "from_group": 1,
+        "to_group": 2,
+        "ts": "2026-08-06T16:50:47.967Z"
+      }
+    ]
+  },
+  {
+    "id": "D011",
+    "name": "TEST Lea 11",
+    "wristband_number": 11,
+    "qr_code": "D011",
+    "home_group": 1,
+    "current_group": 5,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D012",
+    "name": "TEST Filip 12",
+    "wristband_number": 12,
+    "qr_code": "D012",
+    "home_group": 2,
+    "current_group": 6,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D013",
+    "name": "TEST Sára 13",
+    "wristband_number": 13,
+    "qr_code": "D013",
+    "home_group": 3,
+    "current_group": 7,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D014",
+    "name": "TEST Oliver 14",
+    "wristband_number": 14,
+    "qr_code": "D014",
+    "home_group": 4,
+    "current_group": 8,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D015",
+    "name": "TEST Hana 15",
+    "wristband_number": 15,
+    "qr_code": "D015",
+    "home_group": 5,
+    "current_group": 9,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D016",
+    "name": "TEST Jakub 16",
+    "wristband_number": 16,
+    "qr_code": "D016",
+    "home_group": 6,
+    "current_group": 10,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D017",
+    "name": "TEST Terka 17",
+    "wristband_number": 17,
+    "qr_code": "D017",
+    "home_group": 7,
+    "current_group": 1,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D018",
+    "name": "TEST Martin 18",
+    "wristband_number": 18,
+    "qr_code": "D018",
+    "home_group": 8,
+    "current_group": 2,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": [
+      {
+        "round": 1,
+        "station": "A",
+        "action": "correction",
+        "from_group": 2,
+        "to_group": 1,
+        "ts": "2026-08-06T16:50:49.444Z"
+      },
+      {
+        "round": 1,
+        "station": "A",
+        "action": "move",
+        "from_group": 1,
+        "to_group": 2,
+        "ts": "2026-08-06T16:50:49.444Z"
+      }
+    ]
+  },
+  {
+    "id": "D019",
+    "name": "TEST Klára 19",
+    "wristband_number": 19,
+    "qr_code": "D019",
+    "home_group": 9,
+    "current_group": 3,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D020",
+    "name": "TEST Šimon 20",
+    "wristband_number": 20,
+    "qr_code": "D020",
+    "home_group": 10,
+    "current_group": 4,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D021",
+    "name": "TEST Janko 21",
+    "wristband_number": 21,
+    "qr_code": "D021",
+    "home_group": 1,
+    "current_group": 4,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D022",
+    "name": "TEST Anička 22",
+    "wristband_number": 22,
+    "qr_code": "D022",
+    "home_group": 2,
+    "current_group": 5,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D023",
+    "name": "TEST Miško 23",
+    "wristband_number": 23,
+    "qr_code": "D023",
+    "home_group": 3,
+    "current_group": 6,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D024",
+    "name": "TEST Zuzka 24",
+    "wristband_number": 24,
+    "qr_code": "D024",
+    "home_group": 4,
+    "current_group": 7,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D025",
+    "name": "TEST Tomáš 25",
+    "wristband_number": 25,
+    "qr_code": "D025",
+    "home_group": 5,
+    "current_group": 8,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D026",
+    "name": "TEST Katka 26",
+    "wristband_number": 26,
+    "qr_code": "D026",
+    "home_group": 6,
+    "current_group": 9,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D027",
+    "name": "TEST Lukáš 27",
+    "wristband_number": 27,
+    "qr_code": "D027",
+    "home_group": 7,
+    "current_group": 10,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D028",
+    "name": "TEST Ema 28",
+    "wristband_number": 28,
+    "qr_code": "D028",
+    "home_group": 8,
+    "current_group": 1,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D029",
+    "name": "TEST Samko 29",
+    "wristband_number": 29,
+    "qr_code": "D029",
+    "home_group": 9,
+    "current_group": 2,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D030",
+    "name": "TEST Nina 30",
+    "wristband_number": 30,
+    "qr_code": "D030",
+    "home_group": 10,
+    "current_group": 3,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D031",
+    "name": "TEST Adam 31",
+    "wristband_number": 31,
+    "qr_code": "D031",
+    "home_group": 1,
+    "current_group": 3,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D032",
+    "name": "TEST Lea 32",
+    "wristband_number": 32,
+    "qr_code": "D032",
+    "home_group": 2,
+    "current_group": 4,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D033",
+    "name": "TEST Filip 33",
+    "wristband_number": 33,
+    "qr_code": "D033",
+    "home_group": 3,
+    "current_group": 5,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D034",
+    "name": "TEST Sára 34",
+    "wristband_number": 34,
+    "qr_code": "D034",
+    "home_group": 4,
+    "current_group": 6,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D035",
+    "name": "TEST Oliver 35",
+    "wristband_number": 35,
+    "qr_code": "D035",
+    "home_group": 5,
+    "current_group": 7,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D036",
+    "name": "TEST Hana 36",
+    "wristband_number": 36,
+    "qr_code": "D036",
+    "home_group": 6,
+    "current_group": 8,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D037",
+    "name": "TEST Jakub 37",
+    "wristband_number": 37,
+    "qr_code": "D037",
+    "home_group": 7,
+    "current_group": 9,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D038",
+    "name": "TEST Terka 38",
+    "wristband_number": 38,
+    "qr_code": "D038",
+    "home_group": 8,
+    "current_group": 10,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D039",
+    "name": "TEST Martin 39",
+    "wristband_number": 39,
+    "qr_code": "D039",
+    "home_group": 9,
+    "current_group": 1,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D040",
+    "name": "TEST Klára 40",
+    "wristband_number": 40,
+    "qr_code": "D040",
+    "home_group": 10,
+    "current_group": 2,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D041",
+    "name": "TEST Šimon 41",
+    "wristband_number": 41,
+    "qr_code": "D041",
+    "home_group": 1,
+    "current_group": 2,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D042",
+    "name": "TEST Janko 42",
+    "wristband_number": 42,
+    "qr_code": "D042",
+    "home_group": 2,
+    "current_group": 3,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D043",
+    "name": "TEST Anička 43",
+    "wristband_number": 43,
+    "qr_code": "D043",
+    "home_group": 3,
+    "current_group": 2,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": [
+      {
+        "round": 1,
+        "station": "A",
+        "action": "correction",
+        "from_group": 4,
+        "to_group": 1,
+        "ts": "2026-08-06T16:50:55.717Z"
+      },
+      {
+        "round": 1,
+        "station": "A",
+        "action": "move",
+        "from_group": 1,
+        "to_group": 2,
+        "ts": "2026-08-06T16:50:55.717Z"
+      }
+    ]
+  },
+  {
+    "id": "D044",
+    "name": "TEST Miško 44",
+    "wristband_number": 44,
+    "qr_code": "D044",
+    "home_group": 4,
+    "current_group": 5,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D045",
+    "name": "TEST Zuzka 45",
+    "wristband_number": 45,
+    "qr_code": "D045",
+    "home_group": 5,
+    "current_group": 6,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D046",
+    "name": "TEST Tomáš 46",
+    "wristband_number": 46,
+    "qr_code": "D046",
+    "home_group": 6,
+    "current_group": 7,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D047",
+    "name": "TEST Katka 47",
+    "wristband_number": 47,
+    "qr_code": "D047",
+    "home_group": 7,
+    "current_group": 2,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": [
+      {
+        "round": 1,
+        "station": "A",
+        "action": "correction",
+        "from_group": 8,
+        "to_group": 1,
+        "ts": "2026-08-06T16:50:52.045Z"
+      },
+      {
+        "round": 1,
+        "station": "A",
+        "action": "move",
+        "from_group": 1,
+        "to_group": 2,
+        "ts": "2026-08-06T16:50:52.045Z"
+      }
+    ]
+  },
+  {
+    "id": "D048",
+    "name": "TEST Lukáš 48",
+    "wristband_number": 48,
+    "qr_code": "D048",
+    "home_group": 8,
+    "current_group": 9,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D049",
+    "name": "TEST Ema 49",
+    "wristband_number": 49,
+    "qr_code": "D049",
+    "home_group": 9,
+    "current_group": 10,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D050",
+    "name": "TEST Samko 50",
+    "wristband_number": 50,
+    "qr_code": "D050",
+    "home_group": 10,
+    "current_group": 2,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": [
+      {
+        "round": 1,
+        "station": "A",
+        "action": "move",
+        "from_group": 1,
+        "to_group": 2,
+        "ts": "2026-08-06T16:50:57.814Z"
+      }
+    ]
+  },
+  {
+    "id": "D051",
+    "name": "TEST Nina 51",
+    "wristband_number": 51,
+    "qr_code": "D051",
+    "home_group": 1,
+    "current_group": 9,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D052",
+    "name": "TEST Adam 52",
+    "wristband_number": 52,
+    "qr_code": "D052",
+    "home_group": 2,
+    "current_group": 10,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D053",
+    "name": "TEST Lea 53",
+    "wristband_number": 53,
+    "qr_code": "D053",
+    "home_group": 3,
+    "current_group": 1,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D054",
+    "name": "TEST Filip 54",
+    "wristband_number": 54,
+    "qr_code": "D054",
+    "home_group": 4,
+    "current_group": 2,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D055",
+    "name": "TEST Sára 55",
+    "wristband_number": 55,
+    "qr_code": "D055",
+    "home_group": 5,
+    "current_group": 3,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D056",
+    "name": "TEST Oliver 56",
+    "wristband_number": 56,
+    "qr_code": "D056",
+    "home_group": 6,
+    "current_group": 4,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D057",
+    "name": "TEST Hana 57",
+    "wristband_number": 57,
+    "qr_code": "D057",
+    "home_group": 7,
+    "current_group": 2,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": [
+      {
+        "round": 1,
+        "station": "A",
+        "action": "correction",
+        "from_group": 5,
+        "to_group": 1,
+        "ts": "2026-08-06T16:50:59.548Z"
+      },
+      {
+        "round": 1,
+        "station": "A",
+        "action": "move",
+        "from_group": 1,
+        "to_group": 2,
+        "ts": "2026-08-06T16:50:59.548Z"
+      }
+    ]
+  },
+  {
+    "id": "D058",
+    "name": "TEST Jakub 58",
+    "wristband_number": 58,
+    "qr_code": "D058",
+    "home_group": 8,
+    "current_group": 6,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D059",
+    "name": "TEST Terka 59",
+    "wristband_number": 59,
+    "qr_code": "D059",
+    "home_group": 9,
+    "current_group": 7,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D060",
+    "name": "TEST Martin 60",
+    "wristband_number": 60,
+    "qr_code": "D060",
+    "home_group": 10,
+    "current_group": 8,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D061",
+    "name": "TEST Klára 61",
+    "wristband_number": 61,
+    "qr_code": "D061",
+    "home_group": 1,
+    "current_group": 8,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D062",
+    "name": "TEST Šimon 62",
+    "wristband_number": 62,
+    "qr_code": "D062",
+    "home_group": 2,
+    "current_group": 9,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D063",
+    "name": "TEST Janko 63",
+    "wristband_number": 63,
+    "qr_code": "D063",
+    "home_group": 3,
+    "current_group": 10,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D064",
+    "name": "TEST Anička 64",
+    "wristband_number": 64,
+    "qr_code": "D064",
+    "home_group": 4,
+    "current_group": 2,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": [
+      {
+        "round": 1,
+        "station": "A",
+        "action": "move",
+        "from_group": 1,
+        "to_group": 2,
+        "ts": "2026-08-06T16:51:00.957Z"
+      }
+    ]
+  },
+  {
+    "id": "D065",
+    "name": "TEST Miško 65",
+    "wristband_number": 65,
+    "qr_code": "D065",
+    "home_group": 5,
+    "current_group": 2,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D066",
+    "name": "TEST Zuzka 66",
+    "wristband_number": 66,
+    "qr_code": "D066",
+    "home_group": 6,
+    "current_group": 3,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D067",
+    "name": "TEST Tomáš 67",
+    "wristband_number": 67,
+    "qr_code": "D067",
+    "home_group": 7,
+    "current_group": 4,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D068",
+    "name": "TEST Katka 68",
+    "wristband_number": 68,
+    "qr_code": "D068",
+    "home_group": 8,
+    "current_group": 5,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D069",
+    "name": "TEST Lukáš 69",
+    "wristband_number": 69,
+    "qr_code": "D069",
+    "home_group": 9,
+    "current_group": 6,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D070",
+    "name": "TEST Ema 70",
+    "wristband_number": 70,
+    "qr_code": "D070",
+    "home_group": 10,
+    "current_group": 7,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D071",
+    "name": "TEST Samko 71",
+    "wristband_number": 71,
+    "qr_code": "D071",
+    "home_group": 1,
+    "current_group": 1,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": [
+      {
+        "round": 1,
+        "station": "A",
+        "action": "correction",
+        "from_group": 7,
+        "to_group": 1,
+        "ts": "2026-08-06T16:51:02.545Z"
+      },
+      {
+        "round": 1,
+        "station": "A",
+        "action": "home",
+        "from_group": 1,
+        "to_group": 1,
+        "ts": "2026-08-06T16:51:02.545Z"
+      }
+    ]
+  },
+  {
+    "id": "D072",
+    "name": "TEST Nina 72",
+    "wristband_number": 72,
+    "qr_code": "D072",
+    "home_group": 2,
+    "current_group": 8,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D073",
+    "name": "TEST Adam 73",
+    "wristband_number": 73,
+    "qr_code": "D073",
+    "home_group": 3,
+    "current_group": 9,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D074",
+    "name": "TEST Lea 74",
+    "wristband_number": 74,
+    "qr_code": "D074",
+    "home_group": 4,
+    "current_group": 10,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D075",
+    "name": "TEST Filip 75",
+    "wristband_number": 75,
+    "qr_code": "D075",
+    "home_group": 5,
+    "current_group": 1,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D076",
+    "name": "TEST Sára 76",
+    "wristband_number": 76,
+    "qr_code": "D076",
+    "home_group": 6,
+    "current_group": 2,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D077",
+    "name": "TEST Oliver 77",
+    "wristband_number": 77,
+    "qr_code": "D077",
+    "home_group": 7,
+    "current_group": 2,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": [
+      {
+        "round": 1,
+        "station": "A",
+        "action": "correction",
+        "from_group": 3,
+        "to_group": 1,
+        "ts": "2026-08-06T16:51:10.660Z"
+      },
+      {
+        "round": 1,
+        "station": "A",
+        "action": "move",
+        "from_group": 1,
+        "to_group": 2,
+        "ts": "2026-08-06T16:51:10.660Z"
+      }
+    ]
+  },
+  {
+    "id": "D078",
+    "name": "TEST Hana 78",
+    "wristband_number": 78,
+    "qr_code": "D078",
+    "home_group": 8,
+    "current_group": 2,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": [
+      {
+        "round": 1,
+        "station": "A",
+        "action": "correction",
+        "from_group": 4,
+        "to_group": 1,
+        "ts": "2026-08-06T16:51:07.598Z"
+      },
+      {
+        "round": 1,
+        "station": "A",
+        "action": "move",
+        "from_group": 1,
+        "to_group": 2,
+        "ts": "2026-08-06T16:51:07.598Z"
+      }
+    ]
+  },
+  {
+    "id": "D079",
+    "name": "TEST Jakub 79",
+    "wristband_number": 79,
+    "qr_code": "D079",
+    "home_group": 9,
+    "current_group": 5,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D080",
+    "name": "TEST Terka 80",
+    "wristband_number": 80,
+    "qr_code": "D080",
+    "home_group": 10,
+    "current_group": 6,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D081",
+    "name": "TEST Martin 81",
+    "wristband_number": 81,
+    "qr_code": "D081",
+    "home_group": 1,
+    "current_group": 6,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D082",
+    "name": "TEST Klára 82",
+    "wristband_number": 82,
+    "qr_code": "D082",
+    "home_group": 2,
+    "current_group": 7,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D083",
+    "name": "TEST Šimon 83",
+    "wristband_number": 83,
+    "qr_code": "D083",
+    "home_group": 3,
+    "current_group": 8,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D084",
+    "name": "TEST Janko 84",
+    "wristband_number": 84,
+    "qr_code": "D084",
+    "home_group": 4,
+    "current_group": 9,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D085",
+    "name": "TEST Anička 85",
+    "wristband_number": 85,
+    "qr_code": "D085",
+    "home_group": 5,
+    "current_group": 10,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D086",
+    "name": "TEST Miško 86",
+    "wristband_number": 86,
+    "qr_code": "D086",
+    "home_group": 6,
+    "current_group": 1,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D087",
+    "name": "TEST Zuzka 87",
+    "wristband_number": 87,
+    "qr_code": "D087",
+    "home_group": 7,
+    "current_group": 2,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D088",
+    "name": "TEST Tomáš 88",
+    "wristband_number": 88,
+    "qr_code": "D088",
+    "home_group": 8,
+    "current_group": 3,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D089",
+    "name": "TEST Katka 89",
+    "wristband_number": 89,
+    "qr_code": "D089",
+    "home_group": 9,
+    "current_group": 4,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D090",
+    "name": "TEST Lukáš 90",
+    "wristband_number": 90,
+    "qr_code": "D090",
+    "home_group": 10,
+    "current_group": 5,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D091",
+    "name": "TEST Ema 91",
+    "wristband_number": 91,
+    "qr_code": "D091",
+    "home_group": 1,
+    "current_group": 5,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D092",
+    "name": "TEST Samko 92",
+    "wristband_number": 92,
+    "qr_code": "D092",
+    "home_group": 2,
+    "current_group": 2,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": [
+      {
+        "round": 1,
+        "station": "A",
+        "action": "correction",
+        "from_group": 6,
+        "to_group": 1,
+        "ts": "2026-08-06T16:51:12.493Z"
+      },
+      {
+        "round": 1,
+        "station": "A",
+        "action": "move",
+        "from_group": 1,
+        "to_group": 2,
+        "ts": "2026-08-06T16:51:12.493Z"
+      }
+    ]
+  },
+  {
+    "id": "D093",
+    "name": "TEST Nina 93",
+    "wristband_number": 93,
+    "qr_code": "D093",
+    "home_group": 3,
+    "current_group": 7,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D094",
+    "name": "TEST Adam 94",
+    "wristband_number": 94,
+    "qr_code": "D094",
+    "home_group": 4,
+    "current_group": 8,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D095",
+    "name": "TEST Lea 95",
+    "wristband_number": 95,
+    "qr_code": "D095",
+    "home_group": 5,
+    "current_group": 9,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D096",
+    "name": "TEST Filip 96",
+    "wristband_number": 96,
+    "qr_code": "D096",
+    "home_group": 6,
+    "current_group": 10,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D097",
+    "name": "TEST Sára 97",
+    "wristband_number": 97,
+    "qr_code": "D097",
+    "home_group": 7,
+    "current_group": 1,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D098",
+    "name": "TEST Oliver 98",
+    "wristband_number": 98,
+    "qr_code": "D098",
+    "home_group": 8,
+    "current_group": 2,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D099",
+    "name": "TEST Hana 99",
+    "wristband_number": 99,
+    "qr_code": "D099",
+    "home_group": 9,
+    "current_group": 3,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D100",
+    "name": "TEST Jakub 100",
+    "wristband_number": 100,
+    "qr_code": "D100",
+    "home_group": 10,
+    "current_group": 4,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D101",
+    "name": "TEST Terka 101",
+    "wristband_number": 101,
+    "qr_code": "D101",
+    "home_group": 1,
+    "current_group": 4,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D102",
+    "name": "TEST Martin 102",
+    "wristband_number": 102,
+    "qr_code": "D102",
+    "home_group": 2,
+    "current_group": 5,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D103",
+    "name": "TEST Klára 103",
+    "wristband_number": 103,
+    "qr_code": "D103",
+    "home_group": 3,
+    "current_group": 6,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D104",
+    "name": "TEST Šimon 104",
+    "wristband_number": 104,
+    "qr_code": "D104",
+    "home_group": 4,
+    "current_group": 7,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D105",
+    "name": "TEST Janko 105",
+    "wristband_number": 105,
+    "qr_code": "D105",
+    "home_group": 5,
+    "current_group": 8,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  },
+  {
+    "id": "D106",
+    "name": "Betuli DIvoska",
+    "wristband_number": 106,
+    "qr_code": "D106",
+    "home_group": 6,
+    "current_group": 9,
+    "rounds_in_wrong_group": 0,
+    "bait_delay": null,
+    "history": []
+  }
+]

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LPT2 — Rozdeľovacia hra</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>LPT2 — Rozdeľovacia hra</h1>
+  <div class="card" id="status-card">Načítavam stav…</div>
+  <div class="card">
+    <p><a href="scan.html"><strong>📱 Skenovanie</strong></a> — pre animátorov na stanovišti (mobil)</p>
+    <p><a href="pomoc.html"><strong>🔐 Nastavenie telefónu</strong></a> — certifikát pre kameru (raz na každom mobile)</p>
+    <p><a href="admin.html"><strong>🗂 Admin</strong></a> — prehľad detí, skupín, presunov</p>
+    <p><a href="settings.html"><strong>⚙️ Nastavenia</strong></a> — skupiny, stanovištia, import detí</p>
+    <p><a href="qr.html"><strong>🔳 QR kódy</strong></a> — zobrazenie/tlač QR kódov detí</p>
+  </div>
+  <script src="common.js"></script>
+  <script>
+    (async () => {
+      const s = await api('/api/state');
+      if (s.error) { el('status-card').textContent = 'Chyba: ' + s.error; return; }
+      const home = s.children.filter((c) => c.is_home).length;
+      el('status-card').innerHTML =
+        `Hra: <strong>${statusLabel(s.state.status)}</strong> · kolo <strong>${s.state.current_round}</strong>/${s.settings.max_rounds}` +
+        ` · detí: <strong>${s.children.length}</strong> · doma: <strong>${home}</strong>`;
+    })();
+  </script>
+</body>
+</html>

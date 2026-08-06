@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nastavenia — LPT2</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Nastavenia <a href="index.html" style="font-size:0.8rem">← domov</a></h1>
+
+  <div class="card">
+    <h2>Hra</h2>
+    <div class="row">
+      <label>Počet skupín <input id="num-groups" type="number" min="2" max="20" style="width:70px"></label>
+      <label>Max. kôl <input id="max-rounds" type="number" min="1" max="20" style="width:70px"></label>
+    </div>
+    <h2>Bait zdržanie (koľko kôl ostane dieťa v nesprávnej skupine)</h2>
+    <div class="row">
+      <label>Režim
+        <select id="bait-mode">
+          <option value="fixed">fixný prah</option>
+          <option value="random">náhodný per-dieťa</option>
+        </select>
+      </label>
+      <label id="lbl-fixed">Prah (0–2) <input id="bait-fixed" type="number" min="0" max="2" style="width:60px"></label>
+      <label id="lbl-min">od <input id="bait-min" type="number" min="0" max="2" style="width:60px"></label>
+      <label id="lbl-max">do <input id="bait-max" type="number" min="0" max="2" style="width:60px"></label>
+    </div>
+    <p class="muted">Prah 0/1 = presun hneď pri prvom nesúhlasnom skene · prah 2 = dieťa ostane 1 kolo navyše ako „bait“.
+      Náhodný režim prideľuje prah z intervalu pri každom novom nesprávnom zaradení.</p>
+    <p id="bait-warning" class="muted" style="display:none; color:#b9770e">
+      ⚠️ Náhodný režim rozbíja rovnaké počty detí v skupinách — deti prestanú byť synchronizované,
+      takže v skupinách môže byť raz 7, inokedy 14 detí. Fixný prah (1 aj 2) drží počty konštantné.
+    </p>
+    <h2>Rozdelenie na štarte — porotovanie detí</h2>
+    <div class="row">
+      <label>Min. vzdialenosť od domova <input id="min-start" type="number" min="0" max="9" style="width:70px"></label>
+      <span class="muted">skupín (0 = bez obmedzenia, deti môžu začať aj doma)</span>
+    </div>
+    <p class="muted">2 = žiadne dieťa nezačne vo svojej domovskej skupinke a nedostane sa do nej počas 1. ani 2. kola —
+      každé sa musí najprv porotovať. Platí pre tlačidlá rozdelenia v Admin stránke.</p>
+    <p class="muted">Rozdelenie zároveň drží <strong>rovnaké počty detí v skupinách počas celej hry</strong>:
+      každá domovská skupina má rovnaký profil vzdialeností, takže z každej skupiny v kole odíde presne
+      toľko detí, koľko do nej príde z predchádzajúcej.</p>
+    <p id="home-warning" class="muted" style="display:none; color:#b9770e"></p>
+    <h2>Logistická poistka — rovno domov</h2>
+    <div class="row">
+      <label>Od kola <input id="force-home" type="number" min="0" max="20" style="width:70px"></label>
+      <span class="muted">idú deti pri skene rovno do svojej domovskej skupinky (0 = vypnuté)</span>
+    </div>
+    <p class="muted">Garantuje, že na konci hry sú všetci správne rozdelení: od tohto kola sa ignoruje bait aj posun +1
+      a každé nesúhlasiace dieťa dostane pri skene rovno číslo svojej domovskej skupinky.</p>
+  </div>
+
+  <div class="card">
+    <h2>Stanovištia (poradie = poradie rotácie A→B→…→A)</h2>
+    <table id="tbl-stations"></table>
+    <h2>Počiatočné mapovanie skupina → stanovište</h2>
+    <div id="start-map" class="row"></div>
+    <br>
+    <button class="primary" onclick="saveSettings()">💾 Uložiť nastavenia</button>
+    <span id="save-msg" class="muted"></span>
+    <p class="muted">Zmeny počtu skupín a mapovania sa premietnu, len kým hra nezačala.</p>
+  </div>
+
+  <div class="card">
+    <h2>Pridať dieťa</h2>
+    <div class="row">
+      <input id="ch-name" class="grow" placeholder="Meno a priezvisko">
+      <label>domovská sk. <input id="ch-home" type="number" min="1" max="10" style="width:60px"></label>
+      <label>náramok č. <input id="ch-wrist" type="number" style="width:70px" placeholder="auto"></label>
+      <input id="ch-qr" placeholder="QR kód (auto = ID)" style="width:140px">
+      <button class="primary" onclick="addChild()">Pridať</button>
+    </div>
+    <p id="add-msg" class="muted"></p>
+
+    <h2>Hromadný import (CSV riadky)</h2>
+    <p class="muted">Formát: <code>meno;home_group</code> alebo <code>meno;home_group;náramok</code> alebo <code>meno;home_group;náramok;qr_kod</code> — jeden riadok = jedno dieťa.
+      Excel import sa neskôr napojí na tú istú funkciu <code>importChildren()</code>.</p>
+    <textarea id="import-text" rows="6" style="width:100%" placeholder="Janko Hraško;3&#10;Anička Malá;7;12"></textarea>
+    <br><button class="primary" onclick="importCsv()">Importovať</button>
+    <p id="import-msg" class="muted"></p>
+  </div>
+
+  <div class="card">
+    <h2>Zoznam detí (<span id="cnt">0</span>)</h2>
+    <div style="overflow-x:auto; max-height:50vh; overflow-y:auto"><table id="tbl-children"></table></div>
+  </div>
+
+  <script src="common.js"></script>
+  <script>
+    let SETTINGS = null;
+
+    async function refresh() {
+      const s = await api('/api/state');
+      if (s.error && !s.settings) return;
+      SETTINGS = s.settings;
+      el('num-groups').value = SETTINGS.num_groups;
+      el('max-rounds').value = SETTINGS.max_rounds;
+      el('force-home').value = SETTINGS.force_home_round ?? 0;
+      el('min-start').value = SETTINGS.min_start_distance ?? 0;
+      el('bait-mode').value = SETTINGS.bait.mode;
+      el('bait-fixed').value = SETTINGS.bait.delay_rounds;
+      el('bait-min').value = SETTINGS.bait.random_min;
+      el('bait-max').value = SETTINGS.bait.random_max;
+      toggleBaitInputs();
+
+      el('tbl-stations').innerHTML = '<tr><th>Písmeno</th><th>Názov aktivity</th><th>Miesto</th></tr>' +
+        SETTINGS.stations.map((st, i) => `<tr>
+          <td>${st.letter}</td>
+          <td><input data-st-name="${i}" value="${esc(st.name)}"></td>
+          <td><input data-st-place="${i}" value="${esc(st.place)}"></td>
+        </tr>`).join('');
+
+      let map = '';
+      for (let g = 1; g <= SETTINGS.num_groups; g++) {
+        const cur = SETTINGS.group_start_station[g];
+        map += `<label>sk. ${g} → <select data-map="${g}">` +
+          SETTINGS.stations.map((st) => `<option value="${st.letter}" ${st.letter === cur ? 'selected' : ''}>${st.letter}</option>`).join('') +
+          '</select></label>';
+      }
+      el('start-map').innerHTML = map;
+
+      // Veľkosti skupín počas hry kopírujú veľkosti domovských skupín —
+      // nevyvážené domovské skupiny sa nedajú "vyrovnať" rozdelením.
+      const bal = s.balance;
+      el('home-warning').style.display = bal && !bal.home_balanced ? '' : 'none';
+      if (bal && !bal.home_balanced) {
+        el('home-warning').innerHTML = `⚠️ Domovské skupiny nie sú rovnako veľké (${bal.home_min}–${bal.home_max} detí). ` +
+          'Veľkosti skupín počas hry ich kopírujú, takže úplne rovnaký počet nie je možný — ' +
+          'vyrovnaj home_group v zozname detí.';
+      }
+
+      const kids = s.children.sort((a, b) => (a.wristband_number || 0) - (b.wristband_number || 0));
+      el('cnt').textContent = kids.length;
+      el('tbl-children').innerHTML = '<tr><th>#</th><th>ID</th><th>Meno</th><th>Domov. sk.</th><th>QR</th><th></th></tr>' +
+        kids.map((c) => `<tr>
+          <td>${c.wristband_number ?? ''}</td><td>${c.id}</td><td>${esc(c.name)}</td>
+          <td>${c.home_group}</td><td>${esc(c.qr_code)}</td>
+          <td><button onclick="delChild('${c.id}', '${esc(c.name)}')">🗑</button></td>
+        </tr>`).join('');
+    }
+
+    function toggleBaitInputs() {
+      const rnd = el('bait-mode').value === 'random';
+      el('lbl-fixed').style.display = rnd ? 'none' : '';
+      el('lbl-min').style.display = rnd ? '' : 'none';
+      el('lbl-max').style.display = rnd ? '' : 'none';
+      el('bait-warning').style.display = rnd ? '' : 'none';
+    }
+    el('bait-mode').onchange = toggleBaitInputs;
+
+    async function saveSettings() {
+      const stations = SETTINGS.stations.map((st, i) => ({
+        letter: st.letter,
+        name: document.querySelector(`[data-st-name="${i}"]`).value,
+        place: document.querySelector(`[data-st-place="${i}"]`).value,
+      }));
+      const group_start_station = {};
+      document.querySelectorAll('[data-map]').forEach((sel) => { group_start_station[sel.dataset.map] = sel.value; });
+      const r = await api('/api/settings', 'PUT', {
+        num_groups: parseInt(el('num-groups').value, 10),
+        max_rounds: parseInt(el('max-rounds').value, 10),
+        force_home_round: parseInt(el('force-home').value, 10) || 0,
+        min_start_distance: parseInt(el('min-start').value, 10) || 0,
+        stations,
+        group_start_station,
+        bait: {
+          mode: el('bait-mode').value,
+          delay_rounds: parseInt(el('bait-fixed').value, 10),
+          random_min: parseInt(el('bait-min').value, 10),
+          random_max: parseInt(el('bait-max').value, 10),
+        },
+      });
+      el('save-msg').textContent = r.error ? 'Chyba: ' + r.error : '✅ uložené';
+      refresh();
+    }
+
+    async function addChild() {
+      const r = await api('/api/children', 'POST', {
+        name: el('ch-name').value,
+        home_group: el('ch-home').value,
+        wristband_number: el('ch-wrist').value,
+        qr_code: el('ch-qr').value,
+      });
+      el('add-msg').textContent = r.error ? 'Chyba: ' + r.error : `✅ pridané: ${r.child.name} (${r.child.id})`;
+      if (!r.error) { el('ch-name').value = ''; el('ch-qr').value = ''; el('ch-wrist').value = ''; }
+      refresh();
+    }
+
+    async function importCsv() {
+      const rows = el('import-text').value.split('\n').map((l) => l.trim()).filter(Boolean).map((l) => {
+        const p = l.split(/[;,\t]/).map((x) => x.trim());
+        return { name: p[0], home_group: p[1], wristband_number: p[2], qr_code: p[3] };
+      });
+      if (!rows.length) return;
+      const r = await api('/api/children/import', 'POST', { rows });
+      el('import-msg').textContent = r.error ? 'Chyba: ' + r.error
+        : `✅ importovaných: ${r.created}` + (r.errors.length ? ` · chyby: ${r.errors.join(' | ')}` : '');
+      if (!r.error) el('import-text').value = '';
+      refresh();
+    }
+
+    async function delChild(id, name) {
+      if (!confirm(`Vymazať dieťa ${name}?`)) return;
+      await api('/api/children/' + id, 'DELETE');
+      refresh();
+    }
+
+    refresh();
+  </script>
+</body>
+</html>

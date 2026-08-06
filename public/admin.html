@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin — LPT2</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Admin — Rozdeľovacia hra <a href="index.html" style="font-size:0.8rem">← domov</a></h1>
+
+  <div class="card">
+    <div class="row">
+      <div class="grow">
+        Hra: <strong id="g-status">…</strong> · kolo <strong id="g-round">–</strong>/<span id="g-max">10</span>
+        · doma <strong id="g-home">–</strong>/<span id="g-total">–</span> detí
+        <span id="g-force" class="muted"></span>
+      </div>
+      <button class="primary" id="btn-start" onclick="gameAction('start')">▶️ Spustiť hru</button>
+      <button id="btn-pause" onclick="gameAction('pause')">⏸ Pauza</button>
+      <button id="btn-resume" onclick="gameAction('resume')">▶️ Pokračovať</button>
+      <button onclick="simulateRound()">🎲 Odsimulovať kolo</button>
+      <button onclick="advanceRound()">⏭ Vynútiť ďalšie kolo</button>
+      <button onclick="gameAction('finish')">🏁 Ukončiť hru</button>
+      <button class="danger" onclick="resetGame()">🔄 Reset hry</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <span class="muted">Rozdelenie detí do skupín (pred štartom):</span>
+      <button onclick="distribute('wristband')">Podľa náramkov</button>
+      <button onclick="distribute('random')">Náhodne</button>
+    </div>
+  </div>
+
+  <h2>Skupiny</h2>
+  <div class="card" style="overflow-x:auto"><table id="tbl-groups"></table></div>
+
+  <h2>Deti</h2>
+  <div class="card">
+    <div class="row">
+      <input id="filter-name" placeholder="hľadať meno…" oninput="renderChildren()">
+      <label><input type="checkbox" id="filter-away" onchange="renderChildren()"> len mimo domova</label>
+      <label>mimo domova po kole ≥ <input id="filter-round" type="number" min="0" value="0" style="width:60px" oninput="renderChildren()"></label>
+    </div>
+    <p class="muted">
+      🔴 červené = po konci hry / v pokročilom kole stále mimo domovskej skupiny ·
+      🟠 oranžové = matematicky to už domov nestihne (posun +1 skupina/kolo je pomalší než zostávajúce kolá)
+    </p>
+    <div style="overflow-x:auto; max-height:60vh; overflow-y:auto"><table id="tbl-children"></table></div>
+  </div>
+
+  <h2>Log skenov a presunov</h2>
+  <div class="card" style="overflow-x:auto; max-height:50vh; overflow-y:auto"><table id="tbl-log"></table></div>
+
+  <script src="common.js"></script>
+  <script>
+    let DATA = null;
+
+    async function refresh() {
+      const s = await api('/api/state');
+      if (s.error && !s.settings) { document.title = '⚠️ offline'; return; }
+      DATA = s;
+      renderHeader();
+      // Neprekresľuj tabuľky, kým admin niečo vypĺňa (override select, filter),
+      // inak by mu periodický refresh zrušil rozrobený výber.
+      const ae = document.activeElement;
+      if (ae && (ae.tagName === 'SELECT' || ae.tagName === 'INPUT')) return;
+      renderGroups(); renderChildren(); renderLog();
+    }
+
+    function renderHeader() {
+      const { state, settings, children } = DATA;
+      el('g-status').textContent = statusLabel(state.status);
+      el('g-round').textContent = state.current_round;
+      el('g-max').textContent = settings.max_rounds;
+      el('g-total').textContent = children.length;
+      el('g-home').textContent = children.filter((c) => c.is_home).length;
+      el('g-force').textContent = settings.force_home_round >= 1
+        ? ` · od kola ${settings.force_home_round} rovno domov` : '';
+      el('btn-start').style.display = state.status === 'not_started' ? '' : 'none';
+      el('btn-pause').style.display = state.status === 'running' ? '' : 'none';
+      el('btn-resume').style.display = state.status === 'paused' ? '' : 'none';
+    }
+
+    function renderGroups() {
+      const { state, settings, children } = DATA;
+      let html = '<tr><th>Skupinka</th><th>Stanovište</th><th>Kolo ukončené</th><th>Detí</th><th>Z nich doma</th></tr>';
+      for (let g = 1; g <= settings.num_groups; g++) {
+        const info = state.groups[g] || {};
+        const kids = children.filter((c) => c.current_group === g);
+        const home = kids.filter((c) => c.is_home).length;
+        const done = info.finished_round >= state.current_round && state.status === 'running';
+        html += `<tr>
+          <td><strong>${g}</strong></td>
+          <td>${esc(stationLabel(settings, info.station))}</td>
+          <td>${done ? '✅ ' + state.current_round : (info.finished_round || '—')}</td>
+          <td>${kids.length}</td>
+          <td>${home}/${kids.length}</td>
+        </tr>`;
+      }
+      el('tbl-groups').innerHTML = html;
+    }
+
+    function renderChildren() {
+      const { state, settings, children } = DATA;
+      const q = el('filter-name').value.toLowerCase();
+      const onlyAway = el('filter-away').checked;
+      const minRound = parseInt(el('filter-round').value, 10) || 0;
+      let list = [...children].sort((a, b) => (a.wristband_number || 0) - (b.wristband_number || 0));
+      if (q) list = list.filter((c) => c.name.toLowerCase().includes(q));
+      if (onlyAway) list = list.filter((c) => !c.is_home);
+      if (minRound > 0) list = list.filter((c) => !c.is_home && state.current_round >= minRound);
+
+      const groupOpts = (sel) => {
+        let o = '';
+        for (let g = 1; g <= settings.num_groups; g++) o += `<option value="${g}" ${g === sel ? 'selected' : ''}>${g}</option>`;
+        return o;
+      };
+      let html = `<tr><th>#</th><th>Meno</th><th>Domov</th><th>Aktuálna</th><th>Stanovište</th><th>Doma?</th>
+        <th>Kôl v zlej sk.</th><th>Presunov</th><th>Override</th></tr>`;
+      for (const c of list) {
+        const late = !c.is_home && (state.status === 'finished' || state.current_round >= settings.max_rounds);
+        const cls = late ? 'highlight-red' : (c.wont_make_it ? 'highlight-orange' : '');
+        html += `<tr class="${cls}">
+          <td>${c.wristband_number ?? ''}</td>
+          <td>${esc(c.name)} <span class="muted">${c.id}</span></td>
+          <td>${c.home_group}</td>
+          <td>${c.current_group ?? '—'}</td>
+          <td>${esc(c.current_station || '—')}</td>
+          <td>${c.is_home ? '<span class="tag green">doma</span>' : '<span class="tag red">mimo</span>'}</td>
+          <td>${c.rounds_in_wrong_group}${c.bait_delay != null ? ` <span class="muted">/ prah ${c.bait_delay}</span>` : ''}</td>
+          <td>${c.moves_count}</td>
+          <td><select id="ov-${c.id}">${groupOpts(c.current_group)}</select>
+              <button onclick="overrideChild('${c.id}')">Presunúť</button></td>
+        </tr>`;
+      }
+      el('tbl-children').innerHTML = html || '<tr><td>Žiadne deti.</td></tr>';
+    }
+
+    function renderLog() {
+      const { state } = DATA;
+      let html = '<tr><th>Čas</th><th>Kolo</th><th>Stanovište</th><th>Skupinka</th><th>Dieťa</th><th>Výsledok</th></tr>';
+      for (const s of [...state.scans].reverse()) {
+        const res = s.result === 'home' ? 'doma — ostáva'
+          : s.result === 'bait' ? 'nepatrí — ostáva (bait)'
+          : s.forced_home ? `presun → sk. ${s.moved_to} (rovno domov)`
+          : `presun → sk. ${s.moved_to}`;
+        html += `<tr><td>${new Date(s.ts).toLocaleTimeString('sk')}</td><td>${s.round}</td>
+          <td>${esc(s.station)}</td><td>${s.group}</td><td>${esc(s.name)}${s.corrected ? ' ⚠️korekcia' : ''}</td><td>${res}</td></tr>`;
+      }
+      el('tbl-log').innerHTML = html;
+    }
+
+    async function overrideChild(id) {
+      const g = parseInt(el('ov-' + id).value, 10);
+      const r = await api('/api/children/' + id, 'PUT', { current_group: g });
+      if (r.error) alert(r.error);
+      refresh();
+    }
+
+    async function gameAction(a) {
+      if (a === 'start' && !confirm('Spustiť hru? Vynuluje sa história a začne kolo 1.')) return;
+      if (a === 'finish' && !confirm('Ukončiť hru?')) return;
+      const r = await api('/api/game/' + a, 'POST');
+      if (r.error) alert(r.error);
+      refresh();
+    }
+
+    async function simulateRound() {
+      if (!confirm('Odsimulovať celé kolo? Všetky deti sa automaticky "naskenujú" a všetky skupiny sa posunú na ďalšie stanovište.')) return;
+      const r = await api('/api/round/simulate', 'POST');
+      if (r.error) { alert(r.error); refresh(); return; }
+      alert(`Kolo ${r.simulated_round} odsimulované:\n` +
+        `· naskenovaných: ${r.scanned}` +
+        (r.already_scanned ? ` (preskočených už naskenovaných: ${r.already_scanned})` : '') +
+        `\n· presunov: ${r.moves}\n· doma: ${r.home}/${r.total}\n` +
+        (r.status === 'finished' ? '🏁 Hra skončila.' : `Pokračuje kolo ${r.current_round}.`));
+      refresh();
+    }
+
+    async function advanceRound() {
+      if (!confirm('Vynútiť ďalšie kolo? Skupiny, ktoré neukončili, sa posunú automaticky.')) return;
+      const r = await api('/api/round/advance', 'POST');
+      if (r.error) alert(r.error);
+      refresh();
+    }
+
+    async function resetGame() {
+      if (!confirm('RESET: vymaže históriu, skeny a rozdelenie do skupín (deti ostanú). Pokračovať?')) return;
+      const r = await api('/api/game/reset', 'POST');
+      if (r.error) alert(r.error);
+      refresh();
+    }
+
+    async function distribute(mode) {
+      const r = await api('/api/distribute', 'POST', { mode });
+      if (r.error) alert(r.error);
+      refresh();
+    }
+
+    refresh();
+    setInterval(refresh, 5000);
+  </script>
+</body>
+</html>

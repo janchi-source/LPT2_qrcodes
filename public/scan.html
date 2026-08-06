@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#84309c">
+  <title>Vezír QR — LPT2</title>
+  <link rel="stylesheet" href="scan.css">
+</head>
+<body>
+  <img class="brand-logo" src="design/logo.png" alt="HeyPay">
+
+  <!-- Zvuky pri skene: „duuuuuh" keď dieťa patrí, „e-eeeeh" keď nepatrí. -->
+  <audio id="snd-patri" src="sounds/patri.mp3" preload="auto"></audio>
+  <audio id="snd-nepatri" src="sounds/nepatri.mp3" preload="auto"></audio>
+
+  <div id="offline-banner">⚠️ Server nedostupný — skontroluj WiFi. Skeny sa NEukladajú!</div>
+  <div id="env-banner"></div>
+
+  <main class="wrap">
+    <!-- Krok 1: výber stanovišťa / skupiny -->
+    <section id="setup" class="glass">
+      <h1 class="title">Vezír QR</h1>
+      <p class="lead">Vyber svoje stanovište — appka ti povie, ktorá skupinka tam podľa aktuálneho kola je.
+        Ak máš inú, prepni ju ručne.</p>
+
+      <label class="field">
+        <span class="field-label">Stanovište</span>
+        <select id="sel-station"></select>
+      </label>
+
+      <label class="field">
+        <span class="field-label">Skupinka</span>
+        <select id="sel-group"></select>
+      </label>
+
+      <p id="setup-hint" class="hint"></p>
+      <button class="btn btn-gold" onclick="confirmSetup()">Potvrdiť a skenovať</button>
+    </section>
+
+    <!-- Krok 2: skenovanie -->
+    <section id="scanner-ui" style="display:none">
+      <div class="glass topbar">
+        <div class="grow">
+          <div class="station" id="hdr-station"></div>
+          <div class="meta"><span id="hdr-group"></span> · kolo <span id="hdr-round">?</span></div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="backToSetup()">Zmeniť</button>
+      </div>
+
+      <div id="scan-result"></div>
+
+      <div class="glass scanner-card">
+        <div id="reader"></div>
+        <p id="cam-note" class="cam-note"></p>
+        <div class="btn-row">
+          <button class="btn btn-ghost" id="btn-cam-start" onclick="startScanner()">Spustiť</button>
+          <button class="btn btn-ghost" id="btn-cam-stop" onclick="stopScanner()">Zastaviť</button>
+        </div>
+        <div class="manual">
+          <input id="manual-qr" placeholder="alebo zadaj kód ručne">
+          <button class="btn btn-ghost btn-sm" onclick="manualScan()">OK</button>
+        </div>
+      </div>
+
+      <div class="glass">
+        <h2 class="section-title">Naskenované v kole <span class="count" id="scan-count">0</span></h2>
+        <div id="scan-list" class="list"><span class="empty">Zatiaľ nikto.</span></div>
+      </div>
+
+      <button class="btn btn-gold" onclick="finishRound()">Ukončiť kolo</button>
+      <p class="footnote">Stlač, keď sú naskenované všetky deti — skupinka sa posunie na ďalšie stanovište.</p>
+    </section>
+  </main>
+
+  <script src="vendor/html5-qrcode.min.js"></script>
+  <script src="common.js"></script>
+  <script>
+    let SETTINGS = null;
+    let STATE = null;
+    let myStation = localStorage.getItem('lpt2_station') || '';
+    let myGroup = parseInt(localStorage.getItem('lpt2_group'), 10) || null;
+    let scanner = null;
+    let lastScanTs = 0;
+    let lastScanCode = '';
+
+    async function refreshState() {
+      const s = await api('/api/state');
+      if (s.error && !s.settings) { el('offline-banner').style.display = 'block'; return null; }
+      el('offline-banner').style.display = 'none';
+      SETTINGS = s.settings;
+      STATE = s.state;
+      return s;
+    }
+
+    function groupAtStation(letter) {
+      for (const [g, info] of Object.entries(STATE.groups)) {
+        if (info.station === letter) return parseInt(g, 10);
+      }
+      return null;
+    }
+
+    // V roletke sa dlhý názov nezmestí (natívny select text neláme), preto
+    // len písmeno + miesto — celý názov aktivity je potom v hlavičke skenera.
+    function stationShort(st) {
+      return `${st.letter} — ${st.place}`;
+    }
+
+    function fillSetup() {
+      const selSt = el('sel-station');
+      selSt.innerHTML = SETTINGS.stations.map((s) =>
+        `<option value="${s.letter}" ${s.letter === myStation ? 'selected' : ''}>${esc(stationShort(s))}</option>`).join('');
+      const selGr = el('sel-group');
+      const update = () => {
+        const st = selSt.value;
+        const autoG = groupAtStation(st);
+        let opts = '';
+        for (let g = 1; g <= SETTINGS.num_groups; g++) {
+          const sel = (myGroup ? g === myGroup : g === autoG) ? 'selected' : '';
+          opts += `<option value="${g}" ${sel}>Skupinka ${g}${g === autoG ? ' (je tu podľa appky)' : ''}</option>`;
+        }
+        selGr.innerHTML = opts;
+        el('setup-hint').textContent = autoG
+          ? `Podľa kola ${STATE.current_round} je na stanovišti ${st} skupinka ${autoG}.`
+          : 'Appka nevie, ktorá skupinka je tu — vyber ručne.';
+      };
+      selSt.onchange = () => { myGroup = null; update(); };
+      update();
+    }
+
+    // --- Zvuky ---------------------------------------------------------------
+    // Mobilné prehliadače nepustia zvuk, kým používateľ na stránke niečo
+    // neťukne. Odomkneme ich preto pri potvrdení stanovišťa (to je ťuknutie)
+    // — krátko ich prehráme stlmené a hneď zastavíme.
+    let zvukyOdomknute = false;
+
+    function odomkniZvuky() {
+      if (zvukyOdomknute) return;
+      zvukyOdomknute = true;
+      for (const id of ['snd-patri', 'snd-nepatri']) {
+        const a = el(id);
+        if (!a) continue;
+        a.muted = true;
+        const p = a.play();
+        if (p && p.then) {
+          p.then(() => { a.pause(); a.currentTime = 0; a.muted = false; })
+           .catch(() => { a.muted = false; });
+        } else {
+          a.pause(); a.currentTime = 0; a.muted = false;
+        }
+      }
+    }
+
+    function prehraj(id) {
+      const a = el(id);
+      if (!a) return;
+      try {
+        a.currentTime = 0;
+        const p = a.play();
+        // Keď zvukový súbor chýba alebo prehliadač prehratie odmietne,
+        // skenovanie musí bežať ďalej — vizuál a vibrácia stačia.
+        if (p && p.catch) p.catch(() => {});
+      } catch (e) { /* zvuk je len doplnok, nikdy nesmie zhodiť sken */ }
+    }
+
+    function confirmSetup() {
+      myStation = el('sel-station').value;
+      myGroup = parseInt(el('sel-group').value, 10);
+      localStorage.setItem('lpt2_station', myStation);
+      localStorage.setItem('lpt2_group', myGroup);
+      odomkniZvuky();
+      showScanner();
+    }
+
+    function backToSetup() {
+      stopScanner();
+      el('scanner-ui').style.display = 'none';
+      el('setup').style.display = 'block';
+      fillSetup();
+    }
+
+    async function showScanner() {
+      el('setup').style.display = 'none';
+      el('scanner-ui').style.display = 'block';
+      el('hdr-station').textContent = stationLabel(SETTINGS, myStation);
+      el('hdr-group').textContent = 'Skupinka ' + myGroup;
+      el('hdr-round').textContent = STATE.current_round;
+      renderScanList();
+      startScanner();
+    }
+
+    // --- Diagnostika prostredia kamery -------------------------------------
+    // Prehliadač pustí ku kamere (getUserMedia) len na "secure context":
+    // https:// s certifikátom, ktorému telefón VERÍ, alebo localhost.
+    // Najčastejšie chyby na tábore: animátor otvorí http:// adresu, alebo
+    // telefón nemá nainštalovaný certifikát z /pomoc.html.
+    function cameraEnvProblem() {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.isSecureContext) return null;
+      if (location.protocol === 'http:' && !['localhost', '127.0.0.1'].includes(location.hostname)) return 'http';
+      return 'insecure';
+    }
+
+    // Zostaví https adresu na tú istú stránku (port si vypýta od servera).
+    async function httpsUrl() {
+      try {
+        const info = await api('/api/server-info');
+        if (info && info.https_enabled) {
+          return `https://${location.hostname}:${info.https_port}${location.pathname}`;
+        }
+      } catch (e) { /* server info sa nepodarilo načítať */ }
+      return null;
+    }
+
+    async function showEnvBanner() {
+      const problem = cameraEnvProblem();
+      const box = el('env-banner');
+      if (!problem) { box.innerHTML = ''; box.style.display = 'none'; return false; }
+      const url = await httpsUrl();
+      box.style.display = 'block';
+      if (problem === 'http' && url) {
+        box.innerHTML = '<strong>Kamera nepôjde na tejto adrese.</strong><br>' +
+          'Si na nezabezpečenej <code>http://</code> adrese — prehliadač na nej kameru nepovolí.' +
+          `<br><a class="env-link" href="${esc(url)}">Prepnúť na zabezpečenú adresu →</a>`;
+      } else {
+        box.innerHTML = '<strong>Kamera nepôjde na tejto adrese.</strong><br>' +
+          'Telefón neverí certifikátu servera. Otvor návod a nainštaluj certifikát — potom sa sem vráť.' +
+          '<br><a class="env-link" href="pomoc.html">Návod na certifikát →</a>';
+      }
+      return true;
+    }
+
+    // Stav tlačidiel kamery — animátor si ju vie vypnúť (batéria, presun
+    // medzi stanovišťami) a znova zapnúť.
+    function setCamButtons(running, note) {
+      el('btn-cam-start').disabled = running;
+      el('btn-cam-stop').disabled = !running;
+      el('cam-note').innerHTML = note || '';
+    }
+
+    // Zrozumiteľné hlášky namiesto surovej chyby z prehliadača.
+    function cameraErrorText(e) {
+      const name = (e && (e.name || e.type)) || String(e);
+      const spolu = ' Kód môžeš zadať aj ručne nižšie.';
+      if (/NotAllowed|Permission/i.test(name)) {
+        // Na https adrese s IP (typicky tábor) býva príčinou nie zamietnuté
+        // povolenie, ale nenainštalovaný certifikát — telefón stránke neverí
+        // a kameru nepustí, hoci hlási „permission denied".
+        const ipAdresa = /^\d{1,3}(\.\d{1,3}){3}$/.test(location.hostname);
+        if (location.protocol === 'https:' && ipAdresa) {
+          return '⚠️ <strong>Telefón nepustil kameru.</strong> Najčastejšia príčina: nemáš nainštalovaný ' +
+            'certifikát, takže telefón tejto stránke neverí. Otvor návod a nainštaluj ho (na iPhone nezabudni ' +
+            'zapnúť aj <strong>dôveru</strong> v Nastaveniach). Ak certifikát máš, povoľ kameru pre túto stránku: ' +
+            'v Safari ikonka <strong>AA</strong> v adresnom riadku → Nastavenia webu → Kamera → Povoliť.' +
+            '<br><a class="env-link" href="pomoc.html">Návod na certifikát →</a>' + spolu;
+        }
+        return '⚠️ <strong>Prístup ku kamere je zamietnutý.</strong> Povoľ kameru pre túto stránku ' +
+          '(v Safari: ikonka <strong>AA</strong> vľavo v adresnom riadku → Nastavenia webu → Kamera → Povoliť; ' +
+          'v Chrome: ikonka zámku → Povolenia). Ak si na nezabezpečenej adrese, pozri návod v <a class="env-link" href="pomoc.html">pomoc.html</a>.' + spolu;
+      }
+      if (/NotFound|Overconstrained|DevicesNotFound/i.test(name)) {
+        return '⚠️ <strong>Kamera sa nenašla.</strong> Telefón nehlási žiadnu použiteľnú kameru.' + spolu;
+      }
+      if (/NotReadable|TrackStart/i.test(name)) {
+        return '⚠️ <strong>Kameru používa iná aplikácia.</strong> Zavri fotoaparát či video hovor a skús znova.' + spolu;
+      }
+      if (/Security/i.test(name)) {
+        return '⚠️ <strong>Stránka nie je zabezpečená.</strong> Pozri návod v <a class="env-link" href="pomoc.html">pomoc.html</a>.' + spolu;
+      }
+      return '⚠️ Kamera sa nespustila: ' + esc(name) + spolu;
+    }
+
+    async function startScanner() {
+      if (scanner) return;
+      if (await showEnvBanner()) {
+        setCamButtons(false, cameraErrorText({ name: 'SecurityError' }));
+        return;
+      }
+      setCamButtons(true, 'Namier kameru na QR kód na náramku.');
+      scanner = new Html5Qrcode('reader');
+      const config = { fps: 10, qrbox: { width: 220, height: 220 } };
+      try {
+        await scanner.start({ facingMode: 'environment' }, config, onScan, () => {});
+      } catch (e) {
+        // Niektoré telefóny nevedia vyhovieť facingMode — skús vybrať zadnú
+        // kameru zo zoznamu ručne, až potom to vzdaj.
+        try {
+          const cams = await Html5Qrcode.getCameras();
+          if (!cams || !cams.length) throw e;
+          const zadna = cams.find((c) => /back|rear|zadn|environment/i.test(c.label)) || cams[cams.length - 1];
+          await scanner.start(zadna.id, config, onScan, () => {});
+        } catch (e2) {
+          scanner = null;
+          setCamButtons(false, cameraErrorText(e2 && e2.name ? e2 : e));
+        }
+      }
+    }
+
+    function stopScanner() {
+      if (scanner) {
+        scanner.stop().catch(() => {}).finally(() => { el('reader').innerHTML = ''; });
+        scanner = null;
+      }
+      setCamButtons(false, 'Kamera je vypnutá.');
+    }
+
+    function onScan(text) {
+      // Debounce — kamera číta ten istý kód mnohokrát za sekundu.
+      const now = Date.now();
+      if (text === lastScanCode && now - lastScanTs < 3000) return;
+      lastScanCode = text; lastScanTs = now;
+      submitScan(text);
+    }
+
+    function manualScan() {
+      const v = el('manual-qr').value.trim();
+      if (v) { submitScan(v); el('manual-qr').value = ''; }
+    }
+
+    async function submitScan(code) {
+      let r;
+      try {
+        r = await api('/api/scan', 'POST', { qr_code: code, group: myGroup, station: myStation });
+      } catch (e) {
+        el('offline-banner').style.display = 'block';
+        showResult('error', 'Server nedostupný', 'Sken sa NEuložil — skús znova.');
+        if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 100]);
+        return;
+      }
+      el('offline-banner').style.display = 'none';
+      if (r.error) { showResult('error', 'Chyba', r.error); return; }
+
+      const c = r.child;
+      if (r.duplicate) {
+        showResult('error', c.name, '⚠️ Už naskenované v tomto kole' + (r.result === 'move' ? ` (išlo do skupinky ${r.moved_to})` : ''));
+        return;
+      }
+      if (r.result === 'home') {
+        showResult('home', c.name, '✅ Patrí sem — OSTÁVA');
+        prehraj('snd-patri');
+        if (navigator.vibrate) navigator.vibrate(80);
+      } else if (r.result === 'bait') {
+        // Bait: dieťa nepatrí, ale zámerne ho ešte nechávame — animátorovi
+        // ukazujeme zelenú, nech deti nič netušia. Zvuk ide zámerne rovnaký
+        // ako pri „patrí": deti ho počujú, a keby zaznelo „e-eeeeh" a dieťa
+        // aj tak ostalo, hneď by im bolo jasné, že appka zdržiava.
+        showResult('bait', c.name, '✅ OSTÁVA (zatiaľ)');
+        prehraj('snd-patri');
+        if (navigator.vibrate) navigator.vibrate(80);
+      } else if (r.result === 'move') {
+        showResult('move', c.name, r.forced_home
+          ? `🏠 IDE DOMOV — SKUPINKA ${r.moved_to}`
+          : `➡️ IDE DO SKUPINKY ${r.moved_to}`);
+        prehraj('snd-nepatri');
+        if (navigator.vibrate) navigator.vibrate([150, 80, 150]);
+      }
+      renderScanList();
+    }
+
+    function showResult(kind, name, verdict) {
+      const box = el('scan-result');
+      box.className = kind;
+      box.innerHTML = `<div class="big-name">${esc(name)}</div><div class="verdict">${esc(verdict)}</div>`;
+    }
+
+    async function renderScanList() {
+      const s = await refreshState();
+      if (!s) return;
+      el('hdr-round').textContent = STATE.current_round;
+      const scans = STATE.scans.filter((x) => x.round === STATE.current_round && x.group === myGroup);
+      el('scan-count').textContent = scans.length;
+      if (!scans.length) { el('scan-list').innerHTML = '<span class="empty">Zatiaľ nikto.</span>'; return; }
+      el('scan-list').innerHTML = scans.slice().reverse().map((x) => {
+        const tag = x.result === 'move'
+          ? `<span class="tag red">→ sk. ${x.moved_to}</span>`
+          : '<span class="tag green">ostáva</span>';
+        return `<div class="list-item"><span class="nm">${esc(x.name)}</span>${tag}</div>`;
+      }).join('');
+    }
+
+    async function finishRound() {
+      if (!confirm(`Ukončiť kolo ${STATE.current_round} pre skupinku ${myGroup}?`)) return;
+      const r = await api(`/api/group/${myGroup}/finish-round`, 'POST');
+      if (r.error) { alert(r.error); return; }
+      await refreshState();
+      myStation = r.next_station;
+      localStorage.setItem('lpt2_station', myStation);
+      alert(`Hotovo! Skupinka ${myGroup} ide na stanovište: ${stationLabel(SETTINGS, r.next_station)}`);
+      el('hdr-station').textContent = stationLabel(SETTINGS, myStation);
+      el('scan-result').className = '';
+      el('scan-result').innerHTML = '';
+      renderScanList();
+    }
+
+    // Periodický refresh zoznamu (aj detekcia výpadku siete).
+    setInterval(() => {
+      if (el('scanner-ui').style.display !== 'none') renderScanList();
+    }, 5000);
+
+    (async () => {
+      // Upozorni hneď pri otvorení stránky, nie až keď animátor stojí
+      // na stanovišti s deťmi a kamera nenaskočí.
+      showEnvBanner();
+      const s = await refreshState();
+      if (!s) {
+        el('setup').innerHTML = '<h1 class="title">Bez signálu</h1>' +
+          '<p class="lead">Server je nedostupný. Skontroluj WiFi a obnov stránku.</p>';
+        return;
+      }
+      fillSetup();
+    })();
+  </script>
+</body>
+</html>
