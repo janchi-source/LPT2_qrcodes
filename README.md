@@ -38,6 +38,18 @@ KV_REST_API_URL=... KV_REST_API_TOKEN=... npm run push-to-kv
 lokálne spustenie — obidva používajú to isté routovanie z `lib/handler.js`.
 `.vercelignore` zabraňuje nahraniu `certs/` (privátne kľúče!) a `data/`.
 
+### Overenie, že databáza je pripojená
+
+Otvor `https://<projekt>.vercel.app/api/server-info`. Táto adresa funguje
+**aj bez databázy**, práve preto, aby sa dalo diagnostikovať:
+
+- `"storage": "kv"` → databáza je pripojená, všetko je v poriadku,
+- `"storage": "file"` → appka databázu nevidí; v `kv_env` je vidno, ktorá
+  premenná chýba (zobrazuje sa len `true`/`false`, nikdy hodnota).
+
+Najčastejšia príčina, keď sú premenné nastavené a aj tak to nejde: **premenné
+sa prejavia až v novom nasadení** — treba spustiť Redeploy.
+
 ### Súbežnosť (dôležité)
 
 Lokálne je Node jednovláknový a celá herná logika je synchrónna, takže

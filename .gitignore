@@ -1,0 +1,18 @@
+# PRIVÁTNE KĽÚČE — nikdy nesmú ísť do gitu.
+# certs/ca-key.pem je kľúč certifikačnej autority, ktorá sa inštaluje do
+# telefónov animátorov ako DÔVERYHODNÁ. Kto ho má, vie tým telefónom
+# podvrhnúť ľubovoľnú stránku.
+certs/
+
+# Osobné údaje detí (mená, čísla náramkov). Do repozitára nepatria,
+# obzvlášť nie do verejného.
+data/
+
+# Prístupové údaje k databáze (Vercel KV / Upstash).
+.env
+.env.*
+!.env.example
+
+node_modules/
+.vercel/
+.DS_Store
