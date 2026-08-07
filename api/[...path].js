@@ -1,32 +1,14 @@
-// Vstupný bod pre Vercel — všetky /api/* požiadavky idú sem.
-// Statické súbory (public/) servuje Vercel sám, tie sa sem nedostanú.
+// Zámerná poistka, nie duplicita.
 //
-// Stav hry musí byť v KV (Upstash Redis) — na Vercele je súborový systém
-// len na čítanie, takže JSON súbory v data/ by sa nedali zapisovať.
-const { handler } = require('../lib/handler');
-const store = require('../lib/store');
-
-module.exports = (req, res) => {
-  // /api/server-info musí fungovať aj bez databázy — je to diagnostika,
-  // ktorou sa dá overiť, či je pripojenie nastavené správne.
-  // Zámerne `includes` a nie `startsWith` — keby Vercel cestu prepísal,
-  // diagnostika musí byť dostupná tak či tak.
-  const url = req.url || '';
-  const jeDiagnostika = url.includes('server-info') || url.includes('db-test');
-
-  if (!store.useKV && !jeDiagnostika) {
-    res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
-    res.end(JSON.stringify({
-      error: 'Nie je pripojená databáza, takže sa stav hry nedá ukladať. '
-        + 'Doplň na Verceli premenné pre Supabase a znova nasaď projekt (Redeploy).',
-      ocakavane_premenne: [
-        'SUPABASE_URL (https://<id>.supabase.co) + SUPABASE_SERVICE_ROLE_KEY',
-        'alebo (staršie nasadenie) REDIS_URL (rediss://...)',
-        'alebo KV_REST_API_URL + KV_REST_API_TOKEN',
-      ],
-      diagnostika: '/api/server-info',
-    }));
-    return;
-  }
-  handler(req, res);
-};
+// Routovanie na Vercel zabezpečuje rewrite vo vercel.json, ktorý všetky
+// /api/* cesty posiela na api/index.js. Tento súbor tu ostáva preto, že
+// jednosegmentové cesty (/api/state, /api/db-test) sa doň trafia aj priamo
+// cez súborové routovanie — teda aj vtedy, keby rewrite z akéhokoľvek dôvodu
+// neplatil. Bez neho by prípadná chyba v konfigurácii zhodila celú appku.
+//
+// Prečo to bolo treba: Vercel tento catch-all interpretoval, akoby sa volal
+// [path].js — čiže púšťal len JEDEN segment. /api/state fungovalo, ale
+// /api/children/<id> aj /api/game/start končili na 404 od Vercelu a k funkcii
+// sa vôbec nedostali. Preto sa cesta odovzdáva explicitne (viď zistiCestu
+// v lib/handler.js) a nespoliehame sa na odhad podľa názvu súboru.
+module.exports = require('./index.js');

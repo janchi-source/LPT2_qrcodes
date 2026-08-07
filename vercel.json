@@ -5,8 +5,11 @@
   "installCommand": null,
   "framework": null,
   "functions": {
-    "api/**/*.js": { "maxDuration": 15 }
+    "api/*.js": { "maxDuration": 15 }
   },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index?cesta=$1" }
+  ],
   "headers": [
     {
       "source": "/api/(.*)",
