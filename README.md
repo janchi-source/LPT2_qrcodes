@@ -10,7 +10,7 @@ Appka vie bežať dvoma spôsobmi a prepína sa sama podľa premenných prostred
 | režim | úložisko | kedy použiť |
 |---|---|---|
 | **lokálne** (default) | JSON súbory v `data/` | tábor bez internetu — notebook v lokálnej WiFi |
-| **Vercel** | Vercel KV / Upstash Redis | keď je na mieste internet |
+| **Vercel** | Supabase (Postgres cez HTTPS) | keď je na mieste internet |
 
 Hlavný rozdiel z pohľadu animátora: na Vercele má stránka **dôveryhodný
 certifikát**, takže kamera funguje hneď a netreba nič inštalovať do telefónov.
@@ -23,21 +23,37 @@ Na Vercele sa pri výpadku skenovanie zastaví.
 
 1. Nahraj projekt do gitu a naimportuj ho na Vercel (framework: **Other**,
    žiadny build command — je to nastavené vo `vercel.json`).
-2. V projekte: **Storage → Create → Redis** a priraď ho k projektu. Podľa
-   poskytovateľa doplní Vercel jednu z týchto sád premenných — appka si
-   poradí so **všetkými** a prepne sa do KV režimu sama:
+2. Založ databázu na [supabase.com](https://supabase.com) (**New project**).
+   Heslo k databáze, ktoré si tam vymyslíš, appka nepotrebuje — pripája sa
+   cez HTTPS a kľúč.
+3. V Supabase otvor **SQL Editor** a spusti:
 
-   | premenné | ako sa pripája |
+```sql
+create table lpt2_stav (
+  id text primary key,
+  doc jsonb not null default '{}'::jsonb,
+  verzia bigint not null default 0
+);
+```
+
+4. V Supabase choď na **Project Settings → API** a opíš si dve hodnoty:
+   *Project URL* a v sekcii *Project API keys* kľúč **`service_role`**
+   (nie `anon` — ten by pri zapnutom RLS zápis odmietol).
+5. Na Verceli: **Settings → Environment Variables** a pridaj:
+
+   | premenná | hodnota |
    |---|---|
-   | `REDIS_URL` (`rediss://…`) | TCP, protokol RESP (`lib/redis-client.js`) |
-   | `KV_REST_API_URL` + `KV_REST_API_TOKEN` | REST cez HTTP |
-   | `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` | REST cez HTTP |
+   | `SUPABASE_URL` | `https://<id>.supabase.co` (bez lomky na konci) |
+   | `SUPABASE_SERVICE_ROLE_KEY` | kľúč `service_role` |
 
-   Keď sú dostupné oboje, uprednostní sa REST — na serverless je bezstavové
-   HTTP o niečo spoľahlivejšie než držané TCP spojenie.
-3. **Redeploy** (Deployments → ⋯ → Redeploy). Premenné sa prejavia až
+   `service_role` kľúč obchádza Row Level Security, takže **patrí výhradne na
+   server**. Do prehliadača sa nikdy nedostane (appka volá databázu zo
+   serverovej funkcie) a do gitu ho nedávaj.
+
+6. **Redeploy** (Deployments → ⋯ → Redeploy). Premenné sa prejavia až
    v novom nasadení — toto je najčastejšia príčina, prečo to „stále nejde“.
-4. Deti naimportuj cez **Nastavenia** priamo na hostingu. Ak ich máš už
+
+7. Deti naimportuj cez **Nastavenia** priamo na hostingu. Ak ich máš už
    lokálne v `data/`, nahraj ich takto (údaje sa načítajú zo súboru, nie
    z príkazového riadka, aby neostali v histórii shellu):
 
@@ -45,6 +61,11 @@ Na Vercele sa pri výpadku skenovanie zastaví.
 vercel env pull .env.local
 node --env-file=.env.local scripts/push-to-kv.js
 ```
+
+**Staršie nasadenie na Redise** funguje ďalej: keď `SUPABASE_URL` nie je
+nastavená, appka sa vráti k `REDIS_URL`, resp. `KV_REST_API_URL` +
+`KV_REST_API_TOKEN`. Keď je nastavená, má Supabase prednosť — nech appka
+ticho nepíše do starej databázy, ktorá ostala k projektu priradená.
 
 **Čo je kde:** `api/[...path].js` je vstupný bod pre Vercel, `server.js` pre
 lokálne spustenie — obidva používajú to isté routovanie z `lib/handler.js`.
@@ -54,27 +75,28 @@ lokálne spustenie — obidva používajú to isté routovanie z `lib/handler.js
 
 Najrýchlejšie: otvor `https://<projekt>.vercel.app/api/db-test`. Táto adresa
 databázu **naozaj vyskúša** — nielen spojenie, ale celý cyklus, ktorý appka
-počas hry potrebuje (PING → SET → GET → EVAL). Píše pritom len do dočasných
-kľúčov, stavu hry sa nedotkne.
+počas hry potrebuje: zápis, čítanie a hlavne atomický zápis. Píše pritom len
+do skúšobného riadku, stavu hry sa nedotkne.
 
 ```json
-{"ok": true, "mode": "tcp", "ms": 92,
- "kroky": {"ping": "PONG", "zapis_a_citanie": "OK", "atomicky_zapis": "OK"}}
+{"ok": true, "mode": "supabase", "ms": 210,
+ "kroky": {"spojenie": "OK", "zapis_a_citanie": "OK", "atomicky_zapis": "OK"}}
 ```
 
-Keď niečo zlyhá, v `zlyhalo_na` je presný krok a v `chyba` príčina aj
-s adresou a portom (heslo sa do hlášky nikdy nedostane). Najzáludnejší je
-posledný krok: **niektorí poskytovatelia Redisu zakazujú Lua skripty
-(`EVAL`)**, na ktorých stojí atomický zápis. Spojenie aj čítanie by fungovali
-a problém by sa prejavil až pri prvom skene na tábore — preto to `db-test`
-kontroluje vopred.
+Keď niečo zlyhá, v `zlyhalo_na` je presný krok, v `chyba` príčina (kľúč sa do
+hlášky nikdy nedostane) a v `napoveda` konkrétny ďalší krok. Najdôležitejší je
+posledný krok — overuje, že zápis so **starou verziou databáza odmietne**.
+Keby prešiel, dvaja animátori skenujúci v tej istej sekunde by si zápis
+prepísali a jeden sken by zmizol; prišlo by sa na to až na tábore.
 
 Podrobnejší prehľad je na `/api/server-info`. Obe adresy fungujú **aj bez
 databázy**, práve preto, aby sa dalo diagnostikovať:
 
-- `"storage": "kv"` → databáza je pripojená, všetko je v poriadku,
-- `"storage": "file"` → appka databázu nevidí; v `kv_env` je vidno, ktorá
-  premenná chýba (zobrazuje sa len `true`/`false`, nikdy hodnota).
+- `"storage_mode": "supabase"` → databáza je pripojená, všetko je v poriadku,
+- `"storage_mode": "file"` → appka databázu nevidí; v `kv_env` je vidno, ktorá
+  premenná chýba (zobrazuje sa len `true`/`false`, nikdy hodnota),
+- `"verzia"` a `"commit"` → podľa nich sa dá overiť, či hosting beží na
+  aktuálnom kóde, alebo je nasadenie staré.
 
 Najčastejšia príčina, keď sú premenné nastavené a aj tak to nejde: **premenné
 sa prejavia až v novom nasadení** — treba spustiť Redeploy.
@@ -86,16 +108,22 @@ Lokálne je Node jednovláknový a celá herná logika je synchrónna, takže
 viac požiadaviek naraz a inštancií môže bežať viac — dvaja animátori skenujúci
 v tej istej sekunde by si inak prepísali zápis a jeden sken by zmizol.
 
-Preto v KV režime beží každá požiadavka ako transakcia (`store.runTransaction`):
+Preto v databázovom režime beží každá požiadavka ako transakcia
+(`store.runTransaction`):
 načíta sa celý stav, herná logika ho synchrónne upraví v pamäti (kontext je
 oddelený cez `AsyncLocalStorage`) a zapíše sa jedným atomickým
 compare-and-swap zápisom. Keď medzitým zapísal niekto iný, zápis neprejde
 a celá požiadavka sa zopakuje nad čerstvými dátami (max 6 pokusov, potom
 animátor dostane zrozumiteľnú hlášku „skús ešte raz“).
 
-Testuje to `test/store.test.js` proti falošnému Redisu: 10 súbežných skenov,
-z toho väčšina musí zápis opakovať, a napriek tomu sa žiadny nestratí ani
-nezduplikuje.
+Na Supabase túto podmienku vynúti samotná databáza: `UPDATE ... WHERE
+verzia = N` zmení riadok len vtedy, keď verzia stále sedí, a inak nevráti nič.
+Netreba na to Lua skript ani držané spojenie.
+
+Testuje to `test/supabase.test.js` proti falošnému PostgRESTu (a `store.test.js`
+s `redis-url.test.js` to isté pre staršie nasadenie na Redise): 10 súbežných
+skenov, z toho väčšina musí zápis opakovať, a napriek tomu sa žiadny nestratí
+ani nezduplikuje.
 
 ## Spustenie lokálne
 

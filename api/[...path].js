@@ -18,11 +18,11 @@ module.exports = (req, res) => {
     res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
     res.end(JSON.stringify({
       error: 'Nie je pripojená databáza, takže sa stav hry nedá ukladať. '
-        + 'V nastaveniach projektu na Vercele priraď Upstash Redis a znova nasaď projekt.',
+        + 'Doplň na Verceli premenné pre Supabase a znova nasaď projekt (Redeploy).',
       ocakavane_premenne: [
-        'REDIS_URL (rediss://...)',
+        'SUPABASE_URL (https://<id>.supabase.co) + SUPABASE_SERVICE_ROLE_KEY',
+        'alebo (staršie nasadenie) REDIS_URL (rediss://...)',
         'alebo KV_REST_API_URL + KV_REST_API_TOKEN',
-        'alebo UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN',
       ],
       diagnostika: '/api/server-info',
     }));

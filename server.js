@@ -24,8 +24,13 @@ const keyPath = path.join(__dirname, 'certs', 'key.pem');
 const certPath = path.join(__dirname, 'certs', 'cert.pem');
 const httpsEnabled = fs.existsSync(keyPath) && fs.existsSync(certPath);
 
+const POPIS_ULOZISKA = {
+  supabase: 'Supabase (Postgres cez HTTPS)',
+  rest: 'Redis cez REST (Vercel KV / Upstash)',
+  tcp: 'Redis cez TCP (REDIS_URL)',
+};
 console.log(store.useKV
-  ? 'Úložisko: Vercel KV / Upstash (podľa premenných prostredia)'
+  ? `Úložisko: ${POPIS_ULOZISKA[store.mode]}`
   : `Úložisko: JSON súbory v ${store.DATA_DIR}`);
 
 http.createServer(handler).listen(HTTP_PORT, () => {
