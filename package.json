@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node server.js",
     "certs": "bash scripts/gen-certs.sh",
-    "test": "node test/game.test.js && node test/simulacia.test.js && node test/store.test.js",
+    "test": "node test/game.test.js && node test/simulacia.test.js && node test/store.test.js && node test/redis-client.test.js && node test/redis-url.test.js",
     "simulacia": "node test/simulacia.test.js",
     "push-to-kv": "node scripts/push-to-kv.js"
   }

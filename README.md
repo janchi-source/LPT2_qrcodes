@@ -23,15 +23,27 @@ Na Vercele sa pri výpadku skenovanie zastaví.
 
 1. Nahraj projekt do gitu a naimportuj ho na Vercel (framework: **Other**,
    žiadny build command — je to nastavené vo `vercel.json`).
-2. V projekte: **Storage → Create → Upstash Redis** a priraď ho k projektu.
-   Vercel doplní premenné `KV_REST_API_URL` a `KV_REST_API_TOKEN`; appka si
-   ich nájde sama a prepne sa do KV režimu.
-3. Deploy. Skener je na `https://<tvoj-projekt>.vercel.app/scan.html`.
+2. V projekte: **Storage → Create → Redis** a priraď ho k projektu. Podľa
+   poskytovateľa doplní Vercel jednu z týchto sád premenných — appka si
+   poradí so **všetkými** a prepne sa do KV režimu sama:
+
+   | premenné | ako sa pripája |
+   |---|---|
+   | `REDIS_URL` (`rediss://…`) | TCP, protokol RESP (`lib/redis-client.js`) |
+   | `KV_REST_API_URL` + `KV_REST_API_TOKEN` | REST cez HTTP |
+   | `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` | REST cez HTTP |
+
+   Keď sú dostupné oboje, uprednostní sa REST — na serverless je bezstavové
+   HTTP o niečo spoľahlivejšie než držané TCP spojenie.
+3. **Redeploy** (Deployments → ⋯ → Redeploy). Premenné sa prejavia až
+   v novom nasadení — toto je najčastejšia príčina, prečo to „stále nejde“.
 4. Deti naimportuj cez **Nastavenia** priamo na hostingu. Ak ich máš už
-   lokálne v `data/`, vieš ich nahrať jedným príkazom:
+   lokálne v `data/`, nahraj ich takto (údaje sa načítajú zo súboru, nie
+   z príkazového riadka, aby neostali v histórii shellu):
 
 ```bash
-KV_REST_API_URL=... KV_REST_API_TOKEN=... npm run push-to-kv
+vercel env pull .env.local
+node --env-file=.env.local scripts/push-to-kv.js
 ```
 
 **Čo je kde:** `api/[...path].js` je vstupný bod pre Vercel, `server.js` pre

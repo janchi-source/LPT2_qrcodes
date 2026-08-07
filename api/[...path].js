@@ -19,7 +19,8 @@ module.exports = (req, res) => {
       error: 'Nie je pripojená databáza, takže sa stav hry nedá ukladať. '
         + 'V nastaveniach projektu na Vercele priraď Upstash Redis a znova nasaď projekt.',
       ocakavane_premenne: [
-        'KV_REST_API_URL + KV_REST_API_TOKEN',
+        'REDIS_URL (rediss://...)',
+        'alebo KV_REST_API_URL + KV_REST_API_TOKEN',
         'alebo UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN',
       ],
       diagnostika: '/api/server-info',
