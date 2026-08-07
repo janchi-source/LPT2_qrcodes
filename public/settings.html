@@ -91,10 +91,15 @@
   <script src="common.js"></script>
   <script>
     let SETTINGS = null;
+    let pocetDeti = 0; // na overenie, či sa mazanie naozaj prejavilo
 
     async function refresh() {
       const s = await api('/api/state');
-      if (s.error && !s.settings) return;
+      if (s.error && !s.settings) {
+        alert('Nepodarilo sa načítať stav zo servera:\n\n' + (s.error || 'neznáma chyba'));
+        return;
+      }
+      pocetDeti = (s.children || []).length;
       SETTINGS = s.settings;
       el('num-groups').value = SETTINGS.num_groups;
       el('max-rounds').value = SETTINGS.max_rounds;
@@ -204,7 +209,20 @@
 
     async function delChild(id, name) {
       if (!confirm(`Vymazať dieťa ${name}?`)) return;
-      await api('/api/children/' + id, 'DELETE');
+      // Odpoveď sa MUSÍ skontrolovať — inak sa pri chybe navonok nestane nič
+      // a vyzerá to, akoby mazanie nefungovalo bez príčiny.
+      const r = await api('/api/children/' + id, 'DELETE');
+      if (r.error) {
+        alert(`Dieťa sa nepodarilo vymazať:\n\n${r.error}`);
+      } else {
+        const pocetPred = pocetDeti;
+        await refresh();
+        if (pocetDeti === pocetPred) {
+          alert('Server ohlásil úspech, ale dieťa v zozname ostalo.\n'
+            + 'Skús obnoviť stránku — ak tam bude stále, napíš mi to.');
+        }
+        return;
+      }
       refresh();
     }
 

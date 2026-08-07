@@ -18,6 +18,11 @@ function check(label, cond, detail) {
 const db = new Map();
 let prijateAuth = null;
 let rozdelovacRezim = false; // posiela odpoveď po bajtoch, aby sa testoval parser
+// Posiela každú odpoveď v samostatnom pakete a s odstupom, ale v správnom
+// poradí — ako to chodí po skutočnej sieti. Bez toho by sa odpovede zlepili
+// do jedného paketu a klient by ich spracoval naraz, čím by sa zamaskovalo,
+// ako sa zachová medzi dvoma odpoveďami.
+let pomalyRezim = false;
 
 function odpoved(v) {
   if (v === null) return '$-1\r\n';
@@ -28,6 +33,7 @@ function odpoved(v) {
 
 const server = net.createServer((socket) => {
   let buf = Buffer.alloc(0);
+  let radOdpovedi = Promise.resolve(); // drží poradie odpovedí v pomalom režime
   socket.on('data', (chunk) => {
     buf = Buffer.concat([buf, chunk]);
     // Príkazy chodia ako RESP polia — použijeme na ne ten istý parser.
@@ -65,6 +71,11 @@ const server = net.createServer((socket) => {
           socket.write(b.subarray(i, i + 1));
           i++;
         }, 1);
+      } else if (pomalyRezim) {
+        const text = out;
+        radOdpovedi = radOdpovedi.then(() => new Promise((r) => {
+          setTimeout(() => { socket.write(text); r(); }, 5);
+        }));
       } else {
         socket.write(out);
       }
@@ -115,6 +126,25 @@ const server = net.createServer((socket) => {
   try { await client.command(['PADNI']); } catch (e) { /* spojenie spadlo, čakané */ }
   check('po páde spojenia sa klient sám znova pripojí',
     await client.command(['GET', 'a']) === 'ahoj');
+
+  // --- Chybová odpoveď počas súbežného príkazu ------------------------------
+  // store.runTransaction posiela GET dokumentu a GET verzie naraz. Keby sa
+  // chybová odpoveď na jeden príkaz brala ako pád spojenia, zahodilo by sa aj
+  // s druhým príkazom vo fronte: ten by visel do vypršania času funkcie a
+  // odpovede z nového spojenia by sa priradili k nesprávnym príkazom (GET by
+  // vrátil „OK" od AUTH). Navonok by to vyzeralo, že sa zmeny neukladajú.
+  pomalyRezim = true;
+  const dochvilne = (p) => Promise.race([
+    p, new Promise((_, rej) => setTimeout(() => rej(new Error('príkaz nikdy nedobehol')), 2000)),
+  ]);
+  const chybny = dochvilne(client.command(['CHYBNY'])).then(() => null, (e) => e.message);
+  const sucasny = dochvilne(client.command(['GET', 'a'])).then((v) => v, (e) => 'CHYBA: ' + e.message);
+  const [chybaText, hodnota] = await Promise.all([chybny, sucasny]);
+  check('chybová odpoveď sa vráti a nezasekne sa', /neznámy príkaz/.test(chybaText || ''), String(chybaText));
+  check('súbežný príkaz dostane svoju vlastnú odpoveď', hodnota === 'ahoj', String(hodnota));
+  check('spojenie po chybovej odpovedi ostáva použiteľné',
+    await client.command(['GET', 'a']) === 'ahoj');
+  pomalyRezim = false;
 
   // --- Súbežné príkazy (odpovede musia sedieť s požiadavkami) --------------
   await Promise.all([1, 2, 3, 4, 5].map((i) => client.command(['SET', 'k' + i, 'v' + i])));
