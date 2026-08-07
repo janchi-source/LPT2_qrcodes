@@ -52,8 +52,15 @@ lokálne spustenie — obidva používajú to isté routovanie z `lib/handler.js
 
 ### Overenie, že databáza je pripojená
 
-Otvor `https://<projekt>.vercel.app/api/server-info`. Táto adresa funguje
-**aj bez databázy**, práve preto, aby sa dalo diagnostikovať:
+Najrýchlejšie: otvor `https://<projekt>.vercel.app/api/db-test`. Táto adresa
+sa **naozaj pokúsi pripojiť** (pošle Redisu PING) a vráti výsledok:
+
+- `{"ok": true, "mode": "tcp", "odpoved": "PONG"}` → databáza funguje,
+- `{"ok": false, …, "chyba": "…"}` → v `chyba` je presná príčina aj s adresou
+  a portom (heslo sa do hlášky nikdy nedostane) a v `napoveda` čo skúsiť.
+
+Podrobnejší prehľad je na `/api/server-info`. Obe adresy fungujú **aj bez
+databázy**, práve preto, aby sa dalo diagnostikovať:
 
 - `"storage": "kv"` → databáza je pripojená, všetko je v poriadku,
 - `"storage": "file"` → appka databázu nevidí; v `kv_env` je vidno, ktorá

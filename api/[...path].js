@@ -11,7 +11,8 @@ module.exports = (req, res) => {
   // ktorou sa dá overiť, či je pripojenie nastavené správne.
   // Zámerne `includes` a nie `startsWith` — keby Vercel cestu prepísal,
   // diagnostika musí byť dostupná tak či tak.
-  const jeDiagnostika = (req.url || '').includes('server-info');
+  const url = req.url || '';
+  const jeDiagnostika = url.includes('server-info') || url.includes('db-test');
 
   if (!store.useKV && !jeDiagnostika) {
     res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
