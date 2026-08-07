@@ -53,11 +53,21 @@ lokálne spustenie — obidva používajú to isté routovanie z `lib/handler.js
 ### Overenie, že databáza je pripojená
 
 Najrýchlejšie: otvor `https://<projekt>.vercel.app/api/db-test`. Táto adresa
-sa **naozaj pokúsi pripojiť** (pošle Redisu PING) a vráti výsledok:
+databázu **naozaj vyskúša** — nielen spojenie, ale celý cyklus, ktorý appka
+počas hry potrebuje (PING → SET → GET → EVAL). Píše pritom len do dočasných
+kľúčov, stavu hry sa nedotkne.
 
-- `{"ok": true, "mode": "tcp", "odpoved": "PONG"}` → databáza funguje,
-- `{"ok": false, …, "chyba": "…"}` → v `chyba` je presná príčina aj s adresou
-  a portom (heslo sa do hlášky nikdy nedostane) a v `napoveda` čo skúsiť.
+```json
+{"ok": true, "mode": "tcp", "ms": 92,
+ "kroky": {"ping": "PONG", "zapis_a_citanie": "OK", "atomicky_zapis": "OK"}}
+```
+
+Keď niečo zlyhá, v `zlyhalo_na` je presný krok a v `chyba` príčina aj
+s adresou a portom (heslo sa do hlášky nikdy nedostane). Najzáludnejší je
+posledný krok: **niektorí poskytovatelia Redisu zakazujú Lua skripty
+(`EVAL`)**, na ktorých stojí atomický zápis. Spojenie aj čítanie by fungovali
+a problém by sa prejavil až pri prvom skene na tábore — preto to `db-test`
+kontroluje vopred.
 
 Podrobnejší prehľad je na `/api/server-info`. Obe adresy fungujú **aj bez
 databázy**, práve preto, aby sa dalo diagnostikovať:
