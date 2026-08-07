@@ -1,7 +1,12 @@
 // Spoločné helpery pre všetky stránky.
 async function api(path, method = 'GET', body = null) {
-  const opts = { method, headers: { 'Content-Type': 'application/json' } };
-  if (body) opts.body = JSON.stringify(body);
+  // Hlavičku Content-Type posielame len keď naozaj posielame telo — inak sa
+  // hosting snaží rozparsovať prázdne telo a požiadavka sa môže zaseknúť.
+  const opts = { method, headers: {} };
+  if (body) {
+    opts.headers['Content-Type'] = 'application/json';
+    opts.body = JSON.stringify(body);
+  }
 
   let res;
   try {
