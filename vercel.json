@@ -4,6 +4,9 @@
   "buildCommand": null,
   "installCommand": null,
   "framework": null,
+  "functions": {
+    "api/**/*.js": { "maxDuration": 15 }
+  },
   "headers": [
     {
       "source": "/api/(.*)",
