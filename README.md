@@ -142,7 +142,7 @@ z náramku vždy zadať ručne.
 | `/scan.html` | **mobil, animátori**: výber stanovišťa/skupiny, skenovanie QR, ukončenie kola |
 | `/admin.html` | prehľad detí a skupín, filtre, manuálny override, log, ovládanie hry |
 | `/settings.html` | počty, stanovištia, mapovanie skupina→stanovište, bait prah, pridávanie/import detí |
-| `/qr.html` | QR kódy všetkých detí na tlač |
+| `/qr.html` | QR kódy všetkých detí — štítky na náramky, na tlač/PDF |
 
 ## Dizajn skenovacej stránky
 
@@ -171,6 +171,29 @@ Dve vedomé odchýlky od mocku:
   na jeden pohľad. Čitateľnosť tu má prednosť pred vzhľadom.
 - Tlačidlá **START / STOP SCANNING** z mocku sú napojené na reálne zapnutie
   a vypnutie kamery (šetrí batériu pri presune medzi stanovišťami).
+
+## Tlač QR kódov na náramky
+
+Stránka `/qr.html` generuje štítky s pevnou šírkou — predvolene **1,8 cm**,
+pod kódom meno a kód dieťaťa. Na výške nezáleží, dlhšie meno sa zalomí a štítok
+sa jednoducho predĺži.
+
+- Rozmery sú v CSS vo **fyzických jednotkách** (cm/mm), nie v pixeloch, takže
+  výsledok nezávisí od rozlíšenia obrazovky.
+- QR kód sa kreslí ako **SVG (vektor)**, nie ako obrázok — pri tlači sa teda
+  neprevzorkuje a moduly ostanú ostré pri akomkoľvek rozlíšení tlačiarne.
+  Knižnica `qrcode.min.js` vie kresliť len canvas, preto sa z jej modelu
+  (`isDark`) skladá vlastný SVG a susedné moduly v riadku sa spájajú.
+- V ovládaní sa dá prepnúť, či zadaný rozmer platí pre **celý štítok**
+  (predvolené — dôležité, ak sa má zmestiť na náramok) alebo pre **samotný
+  QR kód**. Stránka rovno prepočíta, aký veľký bude jeden modul kódu,
+  a upozorní, keby klesol pod 0,4 mm, čo je hranica spoľahlivého skenovania.
+
+Pri 1,8 cm štítku vychádza QR kód 15,2 mm a modul 0,61 mm — bezpečne nad
+hranicou. Na A4 sa zmestí zhruba 8 × 10 = 80 štítkov na stranu.
+
+**Dôležité pri tlači:** v dialógu nastav mierku na **100 %** (nie „prispôsobiť
+stránke“), inak rozmer nebude sedieť. Prvý hárok si over pravítkom.
 
 ## Zvuky pri skenovaní
 

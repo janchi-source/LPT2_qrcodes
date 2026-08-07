@@ -5,34 +5,151 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>QR kódy — LPT2</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* Štítky na náramky. Rozmery sú zámerne vo fyzických jednotkách (cm),
+       nie v pixeloch — inak by výsledok závisel od rozlíšenia obrazovky
+       a po vytlačení by nesedel.
+
+       QR kód sa kreslí ako SVG (vektor), takže sa pri tlači neprevzorkuje
+       a moduly ostanú ostré pri akomkoľvek rozlíšení tlačiarne. */
+    :root { --sirka: 1.8cm; }
+
+    .sheet { display: flex; flex-wrap: wrap; gap: 3mm; align-items: flex-start; }
+
+    .qr-card {
+      padding: 1.2mm;
+      border: 0.2mm solid #000;
+      background: #fff;
+      text-align: center;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    /* Čo presne má merať 1,8 cm — celý štítok, alebo samotný QR kód. */
+    .sheet.merat-stitok .qr-card { width: var(--sirka); box-sizing: border-box; }
+    .sheet.merat-qr .qr-card { width: var(--sirka); box-sizing: content-box; }
+
+    .qr-card svg { display: block; width: 100%; height: auto; }
+
+    .qr-meno {
+      margin-top: 0.7mm;
+      font-size: 6pt;
+      font-weight: 700;
+      line-height: 1.1;
+      overflow-wrap: anywhere;   /* dlhé meno sa zalomí, na výške nezáleží */
+    }
+    .qr-kod { font-size: 5pt; line-height: 1.15; color: #222; }
+
+    @page { size: A4; margin: 8mm; }
+
+    @media print {
+      body { background: #fff; margin: 0; padding: 0; }
+      .no-print { display: none !important; }
+      .sheet { gap: 2mm; }
+    }
+  </style>
 </head>
 <body>
   <div class="no-print">
     <h1>QR kódy detí <a href="index.html" style="font-size:0.8rem">← domov</a></h1>
-    <p class="muted">Každá karta = QR kód s ID dieťaťa (na náramok). Tlač cez Ctrl/Cmd+P.</p>
-    <button class="primary" onclick="window.print()">🖨 Tlačiť</button>
+    <p class="muted">Štítky na náramky: QR kód, pod ním meno a kód. Na výške nezáleží — dlhšie meno sa zalomí.</p>
+
+    <div class="row">
+      <label>Šírka (cm)
+        <input id="sirka" type="number" value="1.8" min="0.8" max="6" step="0.1" style="width:80px">
+      </label>
+      <label>Rozmer platí pre
+        <select id="co-merat">
+          <option value="stitok" selected>celý štítok (vrátane rámika)</option>
+          <option value="qr">samotný QR kód</option>
+        </select>
+      </label>
+      <button class="primary" onclick="window.print()">🖨 Tlačiť / uložiť ako PDF</button>
+    </div>
+
+    <p class="muted" id="prepocet"></p>
+    <p class="muted">⚠️ V tlačovom dialógu nastav <strong>Mierka / Scale na 100 %</strong>
+      (nie „prispôsobiť stránke“), inak rozmer nebude sedieť. Prvý hárok si over pravítkom.</p>
   </div>
-  <div id="cards"></div>
+
+  <div id="cards" class="sheet merat-stitok"></div>
 
   <script src="vendor/qrcode.min.js"></script>
   <script src="common.js"></script>
   <script>
+    // Tichá zóna (biely okraj) v moduloch. Norma odporúča 4; na 1,8 cm štítku
+    // by to kód zbytočne zmenšilo, preto 2 — zvyšok tichej zóny tvorí biele
+    // odsadenie štítku.
+    const TICHA_ZONA = 2;
+
+    // Vygeneruje QR ako SVG. Knižnica vie kresliť len canvas, ale jej model
+    // (ktoré moduly sú tmavé) je prístupný — z neho poskladáme vektor.
+    // Susedné tmavé moduly v riadku sa spájajú do jedného obdĺžnika, aby
+    // SVG nemalo zbytočne veľa prvkov.
+    function qrSvg(text) {
+      const kos = document.createElement('div');
+      const qr = new QRCode(kos, { text, width: 64, height: 64, correctLevel: QRCode.CorrectLevel.M });
+      const model = qr._oQRCode;
+      const n = model.getModuleCount();
+      const celkom = n + TICHA_ZONA * 2;
+      let d = '';
+      for (let r = 0; r < n; r++) {
+        let c = 0;
+        while (c < n) {
+          if (!model.isDark(r, c)) { c++; continue; }
+          const od = c;
+          while (c < n && model.isDark(r, c)) c++;
+          const sirka = c - od;
+          d += `M${od + TICHA_ZONA} ${r + TICHA_ZONA}h${sirka}v1h-${sirka}z`;
+        }
+      }
+      return { svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${celkom} ${celkom}" `
+        + `shape-rendering="crispEdges"><rect width="${celkom}" height="${celkom}" fill="#fff"/>`
+        + `<path d="${d}" fill="#000"/></svg>`, moduly: n, celkom };
+    }
+
+    let poslednyPocetModulov = 21;
+
+    function prepocitaj() {
+      const cm = parseFloat(el('sirka').value);
+      const preStitok = el('co-merat').value === 'stitok';
+      if (!(cm > 0)) return;
+      document.documentElement.style.setProperty('--sirka', cm + 'cm');
+      el('cards').className = 'sheet ' + (preStitok ? 'merat-stitok' : 'merat-qr');
+
+      // Odsadenie 1,2 mm + rámik 0,2 mm na každej strane.
+      const okraje = 2 * (1.2 + 0.2);
+      const qrMm = preStitok ? cm * 10 - okraje : cm * 10;
+      const modulMm = qrMm / (poslednyPocetModulov + TICHA_ZONA * 2);
+      el('prepocet').innerHTML =
+        `Vytlačí sa: štítok <strong>${(preStitok ? cm * 10 : cm * 10 + okraje).toFixed(1)} mm</strong> široký, `
+        + `QR kód <strong>${qrMm.toFixed(1)} mm</strong>, jeden modul kódu ${modulMm.toFixed(2)} mm.`
+        + (modulMm < 0.4
+          ? ' <strong style="color:#c0392b">⚠️ Pod 0,4 mm sa kód číta zle — zväčši šírku.</strong>'
+          : ' Na spoľahlivé skenovanie stačí ~0,4 mm, takže je to v poriadku.');
+    }
+
+    el('sirka').addEventListener('input', prepocitaj);
+    el('co-merat').addEventListener('change', prepocitaj);
+
     (async () => {
       const s = await api('/api/state');
       if (s.error && !s.children) { el('cards').textContent = 'Server nedostupný.'; return; }
-      const kids = s.children.sort((a, b) => (a.wristband_number || 0) - (b.wristband_number || 0));
-      if (!kids.length) { el('cards').innerHTML = '<p>Žiadne deti — pridaj ich v <a href="settings.html">Nastaveniach</a>.</p>'; return; }
-      for (const c of kids) {
-        const card = document.createElement('div');
-        card.className = 'qr-card';
-        const qrDiv = document.createElement('div');
-        card.appendChild(qrDiv);
-        const label = document.createElement('div');
-        label.innerHTML = `<strong>#${c.wristband_number ?? ''}</strong> ${esc(c.name)}<br><span class="muted">${esc(c.qr_code)}</span>`;
-        card.appendChild(label);
-        el('cards').appendChild(card);
-        new QRCode(qrDiv, { text: c.qr_code, width: 140, height: 140, correctLevel: QRCode.CorrectLevel.M });
+      const kids = (s.children || []).sort((a, b) => (a.wristband_number || 0) - (b.wristband_number || 0));
+      if (!kids.length) {
+        el('cards').innerHTML = '<p>Žiadne deti — pridaj ich v <a href="settings.html">Nastaveniach</a>.</p>';
+        return;
       }
+      const kusy = [];
+      for (const c of kids) {
+        const { svg, moduly } = qrSvg(c.qr_code);
+        poslednyPocetModulov = Math.max(poslednyPocetModulov, moduly);
+        kusy.push('<div class="qr-card">' + svg
+          + `<div class="qr-meno">${esc(c.name)}</div>`
+          + `<div class="qr-kod">#${c.wristband_number ?? ''} · ${esc(c.qr_code)}</div></div>`);
+      }
+      el('cards').innerHTML = kusy.join('');
+      prepocitaj();
     })();
   </script>
 </body>
