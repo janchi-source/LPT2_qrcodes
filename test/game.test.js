@@ -111,30 +111,34 @@ check('hra skončila po max_rounds', st.status === 'finished');
 // kolo o +1, takže domov dôjde každé (d <= 9 < 10 kôl) — všetci doma.
 check('všetky deti doma (prah 1, 10 kôl)', homeCount === kids.length);
 
-// --- Nastavenie, pri ktorom by hra nedopadla, sa NESMIE dať spustiť ----------
-// Prah 2 znamená 2 kolá na jeden posun, takže najvzdialenejšie dieťa (9 skupín)
-// potrebuje 18 kôl. Hra ich má 10 — časť detí by sa domov nikdy nedostala
-// a na tábore by sa na to prišlo až o 11:40. Kontrola to musí zachytiť vopred.
+// --- Rozdelenie sa prispôsobí počtu kôl --------------------------------------
+// Počet kôl je daný harmonogramom (10 stanovíšť = 10 kôl), takže sa mu musí
+// prispôsobiť rozdelenie, nie naopak. Pri bait prahu 2 trvá jeden posun 2 kolá,
+// takže dieťa stihne za 10 kôl 5 posunov — najväčšia štartová vzdialenosť teda
+// nesmie byť 9, ale 5. Hra tak vyjde už z konštrukcie.
 game.resetGame();
 game.saveSettings({ bait: { mode: 'fixed', delay_rounds: 2, random_min: 0, random_max: 2 }, force_home_round: 0 });
-game.distributeChildren('wristband');
-const nevyjde = game.preflight();
-check('kontrola vopred odhalí, že pri prahu 2 hra nevyjde',
-  nevyjde.ok === false && nevyjde.chyby.some((x) => /18 kôl/.test(x)),
-  JSON.stringify(nevyjde.chyby));
-check('kontrola vyráta správnu rezervu kôl',
-  nevyjde.vypocty.potrebnych_kol === 18 && nevyjde.vypocty.kol_na_presun === 2,
-  JSON.stringify(nevyjde.vypocty));
+const rozd = game.distributeChildren('wristband');
+check('rozdelenie si pri prahu 2 zníži strop vzdialenosti na 5',
+  rozd.distribution.max_start_distance === 5 && rozd.distribution.kol_na_presun === 2,
+  JSON.stringify(rozd.distribution));
 
-const odmietnute = game.startGame();
-check('startGame takú hru odmietne spustiť', !!odmietnute.error, JSON.stringify(odmietnute).slice(0, 120));
-check('a hra naozaj nebeží', game.getState().status === 'not_started');
+const vzdialenosti = game.getChildren().map((c) => (c.home_group - c.current_group + 10) % 10);
+check('žiadne dieťa nezačína ďalej, než stihne prejsť', Math.max(...vzdialenosti) <= 5,
+  `najväčšia vzdialenosť ${Math.max(...vzdialenosti)}`);
 
-// Po oprave prahu na 1 musí tá istá zostava prejsť.
-game.saveSettings({ bait: { mode: 'fixed', delay_rounds: 1, random_min: 0, random_max: 2 } });
-check('po oprave prahu kontrola prejde', game.preflight().ok === true,
+check('kontrola pred štartom prejde', game.preflight().ok === true,
   JSON.stringify(game.preflight().chyby));
 check('a hra sa spustí', !game.startGame().error && game.getState().status === 'running');
+
+guard = 0;
+while (game.getState().status === 'running' && guard++ < 20) game.simulateRound();
+kids = game.getChildren();
+check('pri prahu 2 sú na konci VŠETCI doma (predtým časť neprišla)',
+  game.getState().status === 'finished' && kids.every((c) => c.current_group === c.home_group),
+  `doma ${kids.filter((c) => c.current_group === c.home_group).length}/${kids.length}`);
+
+game.saveSettings({ bait: { mode: 'fixed', delay_rounds: 1, random_min: 0, random_max: 2 } });
 
 // --- Logistická poistka force_home_round: od daného kola rovno domov ---
 game.resetGame();

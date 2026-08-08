@@ -31,6 +31,15 @@ function maChybu(vzor) {
   return game.preflight().chyby.some((x) => vzor.test(x));
 }
 
+// Dohrá hru do konca a povie, či sú na konci všetky deti doma.
+function dohrajHru() {
+  if (game.startGame().error) return false;
+  let guard = 0;
+  while (game.getState().status === 'running' && guard++ < 40) game.simulateRound();
+  return game.getState().status === 'finished'
+    && game.getChildren().every((c) => c.current_group === c.home_group);
+}
+
 // --- Zdravá zostava musí prejsť ---------------------------------------------
 pripravDeti();
 game.distributeChildren('wristband', 'ZDRAVA');
@@ -42,28 +51,55 @@ check('výpočty sedia: 9 posunov × 1 kolo = 9 z 10 kôl',
   JSON.stringify(p.vypocty));
 check('hra sa spustí', !game.startGame().error);
 
-// --- Málo kôl ----------------------------------------------------------------
+// --- Menej kôl => rozdelenie sa stiahne bližšie k domovu ----------------------
+// Kratšia hra nie je chyba, len sa deti nesmú umiestniť tak ďaleko.
 pripravDeti();
 game.saveSettings({ max_rounds: 5 });
-game.distributeChildren('wristband', 'MALOKOL');
-check('málo kôl sa odhalí', maChybu(/potrebuje 9 kôl.*ale hra má 5/));
-check('a hra sa nespustí', !!game.startGame().error);
+let r = game.distributeChildren('wristband', 'MALOKOL');
+check('pri 5 kolách sa strop vzdialenosti stiahne na 5', r.distribution.max_start_distance === 5,
+  JSON.stringify(r.distribution));
+check('kontrola nehlási chybu', game.preflight().ok === true,
+  JSON.stringify(game.preflight().chyby));
+check('a všetci sú za 5 kôl doma', dohrajHru() === true);
 game.saveSettings({ max_rounds: 10 });
 
-// --- Bait prah spomalí presuny nad limit --------------------------------------
+// --- Pomalší bait prah sa RIEŠI rozdelením, nie odmietnutím --------------------
+// Počet kôl je daný harmonogramom, takže sa mu prispôsobí rozdelenie: pri prahu
+// 2 trvá posun 2 kolá, za 10 kôl teda dieťa stihne 5 posunov a ďalej ako 5 sa
+// nikto neumiestni. Hra vyjde z konštrukcie a kontrola nemá čo hlásiť.
 pripravDeti();
 game.saveSettings({ bait: { mode: 'fixed', delay_rounds: 2, random_min: 0, random_max: 2 } });
-game.distributeChildren('wristband', 'PRAH2');
-check('spomalenie prahom sa odhalí', maChybu(/18 kôl/));
-check('a poradí, čo s tým', maChybu(/bait prah na 1/));
-game.saveSettings({ bait: { mode: 'fixed', delay_rounds: 1, random_min: 0, random_max: 2 } });
+r = game.distributeChildren('wristband', 'PRAH2');
+check('pri prahu 2 si rozdelenie zníži strop na 5', r.distribution.max_start_distance === 5,
+  JSON.stringify(r.distribution));
+p = game.preflight();
+check('a kontrola nehlási žiadnu chybu', p.ok === true, JSON.stringify(p.chyby));
+check('potrebných kôl sa zmestí do 10', p.vypocty.potrebnych_kol <= 10,
+  JSON.stringify(p.vypocty));
+check('hra sa spustí a dohrá so všetkými doma', dohrajHru() === true);
 
-// Náhodný režim sa musí posudzovať podľa NAJHORŠIEHO možného prahu.
+// Náhodný režim sa musí posudzovať podľa NAJHORŠIEHO možného prahu — inak by
+// hra vyšla len vtedy, keď sa pošťastí.
 pripravDeti();
 game.saveSettings({ bait: { mode: 'random', delay_rounds: 1, random_min: 0, random_max: 2 } });
-game.distributeChildren('wristband', 'NAHODNY');
-check('náhodný prah sa počíta z najhoršieho prípadu', maChybu(/18 kôl/));
+r = game.distributeChildren('wristband', 'NAHODNY');
+check('náhodný prah sa počíta z najhoršieho prípadu (max 2 => strop 5)',
+  r.distribution.kol_na_presun === 2 && r.distribution.max_start_distance === 5,
+  JSON.stringify(r.distribution));
+check('a hra aj tak dohrá so všetkými doma', dohrajHru() === true);
 game.saveSettings({ bait: { mode: 'fixed', delay_rounds: 1, random_min: 0, random_max: 2 } });
+
+// --- Protirečivé požiadavky sa riešiť nedajú — tie sa musia ohlásiť -----------
+pripravDeti();
+game.saveSettings({ bait: { mode: 'fixed', delay_rounds: 6, random_min: 0, random_max: 2 }, min_start_distance: 2 });
+check('min. vzdialenosť, ktorá sa nedá prejsť, sa odhalí', maChybu(/Min. vzdialenosť od domova je 2/));
+const odmietnute = game.distributeChildren('wristband', 'NEDA');
+check('a rozdelenie to odmietne spraviť', !!odmietnute.error, JSON.stringify(odmietnute).slice(0, 140));
+
+pripravDeti();
+game.saveSettings({ bait: { mode: 'fixed', delay_rounds: 11, random_min: 0, random_max: 2 }, min_start_distance: 0 });
+check('prah dlhší než celá hra sa odhalí', maChybu(/nezmestí sa ani jeden/));
+game.saveSettings({ bait: { mode: 'fixed', delay_rounds: 1, random_min: 0, random_max: 2 }, min_start_distance: 2 });
 
 // --- Poistka „rovno domov" cestu skráti ---------------------------------------
 pripravDeti();

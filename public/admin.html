@@ -103,9 +103,11 @@
 
       const v = p.vypocty;
       const suhrn = `${v.deti} detí · ${v.skupiny} skupín · ${v.kola} kôl · `
+        + `jeden posun = ${v.kol_na_presun} ${v.kol_na_presun === 1 ? 'kolo' : 'kolá'} · `
         + `najdlhšia cesta domov ${v.najvacsia_vzdialenost} `
-        + `${v.najvacsia_vzdialenost === 1 ? 'posun' : 'posunov'} × ${v.kol_na_presun} `
-        + `= ${v.potrebnych_kol} kôl` + (p.ok ? ` · rezerva ${v.rezerva_kol}` : '');
+        + `${v.najvacsia_vzdialenost === 1 ? 'posun' : 'posunov'} = ${v.potrebnych_kol} kôl`
+        + (p.ok ? ` · rezerva ${v.rezerva_kol}` : '')
+        + ` · rozdelenie umiestňuje deti najviac ${v.strop_vzdialenosti} skupín od domova`;
 
       box.style.borderLeft = p.ok ? '4px solid #27ae60' : '4px solid #c0392b';
       box.innerHTML = (p.ok
