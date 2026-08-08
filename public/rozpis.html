@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rozpis skupiniek — LPT2</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Na obrazovke sa stránka správa ako zvyšok appky; pri tlači sa prepne
+       do podoby, ktorá sa dá rozdať animátorom. */
+    .rozpis-hlavicka { display: flex; flex-wrap: wrap; gap: 16px; align-items: baseline; }
+    .seed { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 1.15rem;
+            font-weight: 700; letter-spacing: 0.08em; }
+    .skupina { break-inside: avoid; page-break-inside: avoid; margin-bottom: 14px; }
+    .skupina h2 { margin: 0 0 6px; font-size: 1.05rem; }
+    .skupina .miesto { font-weight: 400; color: #555; }
+    table.deti { width: 100%; border-collapse: collapse; }
+    table.deti th, table.deti td { border: 1px solid #bbb; padding: 3px 6px; text-align: left; }
+    table.deti th { background: #eee; }
+    table.deti td.c { text-align: center; width: 3.2em; }
+    .mriezka { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .varovanie { color: #c0392b; font-weight: 600; }
+
+    @media print {
+      /* Ovládacie prvky a navigácia na papier nepatria. */
+      .noprint { display: none !important; }
+      body { background: #fff; color: #000; margin: 0; font-size: 10pt; }
+      .card { border: 0; box-shadow: none; padding: 0; margin: 0; }
+      h1 { font-size: 14pt; margin: 0 0 4pt; }
+      /* Každá skupinka na vlastnú stranu — animátor dostane svoj list. */
+      .skupina { page-break-after: always; }
+      .skupina:last-child { page-break-after: auto; }
+      .mriezka { display: block; }
+      table.deti th { background: #ddd !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      @page { size: A4 portrait; margin: 12mm; }
+    }
+  </style>
+</head>
+<body>
+  <h1 class="noprint">Rozpis skupiniek <a href="index.html" style="font-size:0.8rem">← domov</a></h1>
+
+  <div class="card noprint">
+    <div class="row">
+      <button class="primary" onclick="window.print()">🖨 Vytlačiť / uložiť ako PDF</button>
+      <label><input type="checkbox" id="po-stranach" checked onchange="prekresli()">
+        každá skupinka na vlastnú stranu</label>
+      <span class="grow"></span>
+      <button onclick="nacitaj()">↻ Obnoviť</button>
+    </div>
+    <p class="muted">V dialógu tlače zvoľ <strong>Cieľ → Uložiť ako PDF</strong>.
+      Rozpis ukazuje <strong>štartové</strong> zloženie skupiniek — teda stav pred 1. kolom.</p>
+  </div>
+
+  <div id="obsah"></div>
+
+  <script src="common.js"></script>
+  <script>
+    let DATA = null;
+
+    async function nacitaj() {
+      const s = await api('/api/state');
+      if (s.error && !s.settings) {
+        el('obsah').innerHTML = `<div class="card varovanie">Nepodarilo sa načítať stav: ${esc(s.error)}</div>`;
+        return;
+      }
+      DATA = s;
+      prekresli();
+    }
+
+    function prekresli() {
+      if (!DATA) return;
+      const { settings, children, distribution } = DATA;
+      const poStranach = el('po-stranach').checked;
+
+      // Nerozdelené deti = rozpis by klamal. Radšej to povedať rovno.
+      const nerozdelene = children.filter((c) => c.current_group == null);
+      if (!children.length || nerozdelene.length === children.length) {
+        el('obsah').innerHTML = '<div class="card varovanie">Deti ešte nie sú rozdelené do skupiniek. '
+          + 'Rozdelenie spusti v <a href="admin.html">Admin</a> stránke, potom sa sem vráť.</div>';
+        return;
+      }
+
+      const skupiny = {};
+      for (let g = 1; g <= settings.num_groups; g++) skupiny[g] = [];
+      for (const c of children) if (skupiny[c.current_group]) skupiny[c.current_group].push(c);
+      for (const g of Object.keys(skupiny)) {
+        skupiny[g].sort((a, b) => (a.wristband_number || 0) - (b.wristband_number || 0));
+      }
+
+      const d = distribution;
+      const hlavicka = `
+        <div class="card rozpis-hlavicka">
+          <div><strong>LPT2 — rozdeľovacia hra</strong> · štartové zloženie skupiniek</div>
+          <div>seed: <span class="seed">${esc(d ? d.seed : '—')}</span></div>
+          <div class="muted">${d ? `${d.mode === 'random' ? 'náhodne' : 'podľa náramkov'} · `
+            + new Date(d.created_at).toLocaleString('sk-SK') : ''}</div>
+          <div class="muted">${children.length} detí · ${settings.num_groups} skupiniek</div>
+        </div>
+        ${nerozdelene.length ? `<div class="card varovanie">Pozor: ${nerozdelene.length} detí nemá pridelenú skupinku — v rozpise nie sú.</div>` : ''}
+        ${d ? '' : '<div class="card varovanie">Chýba seed — rozdelenie prebehlo v staršej verzii appky, '
+          + 'takže sa nedá spätne zopakovať. Odporúčam rozdeliť deti nanovo.</div>'}`;
+
+      const bloky = [];
+      for (let g = 1; g <= settings.num_groups; g++) {
+        const kde = settings.stations.find((s) => s.letter === settings.group_start_station[g]);
+        const riadky = skupiny[g].map((c) => `<tr>
+            <td class="c">${c.wristband_number ?? ''}</td>
+            <td>${esc(c.name)}</td>
+            <td class="c">${c.home_group}</td>
+          </tr>`).join('');
+        bloky.push(`<div class="card skupina">
+          <h2>Skupinka ${g} <span class="miesto">— štart: ${kde ? esc(kde.letter + ' · ' + kde.place) : '?'}
+            · ${skupiny[g].length} detí</span></h2>
+          <table class="deti">
+            <tr><th class="c">č.</th><th>Meno</th><th class="c">domov</th></tr>
+            ${riadky || '<tr><td colspan="3" class="muted">nikto</td></tr>'}
+          </table>
+        </div>`);
+      }
+
+      el('obsah').innerHTML = hlavicka
+        + `<div class="${poStranach ? '' : 'mriezka'}">${bloky.join('')}</div>`;
+      // Prepínač „na vlastnú stranu" musí ovplyvniť aj tlač.
+      document.querySelectorAll('.skupina').forEach((n) => {
+        n.style.pageBreakAfter = poStranach ? '' : 'auto';
+      });
+    }
+
+    nacitaj();
+  </script>
+</body>
+</html>

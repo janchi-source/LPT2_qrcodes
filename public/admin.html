@@ -28,7 +28,18 @@
       <span class="muted">Rozdelenie detí do skupín (pred štartom):</span>
       <button onclick="distribute('wristband')">Podľa náramkov</button>
       <button onclick="distribute('random')">Náhodne</button>
+      <span class="grow"></span>
+      <a href="rozpis.html">🖨 Rozpis na tlač</a>
     </div>
+    <div class="row" style="margin-top:8px">
+      <span class="muted">Seed rozdelenia:</span>
+      <strong id="g-seed" style="font-family:ui-monospace,Menlo,Consolas,monospace; letter-spacing:0.08em">—</strong>
+      <span class="grow"></span>
+      <input id="seed-input" placeholder="zopakovať zo seedu…" style="width:170px">
+      <button onclick="distribute('wristband', el('seed-input').value)">Rozdeliť zo seedu</button>
+    </div>
+    <p class="muted">Seed si poznač. S rovnakým seedom vznikne presne to isté rozdelenie,
+      takže sa dá kedykoľvek obnoviť alebo spätne overiť.</p>
   </div>
 
   <h2>Skupiny</h2>
@@ -76,6 +87,7 @@
       el('g-home').textContent = children.filter((c) => c.is_home).length;
       el('g-force').textContent = settings.force_home_round >= 1
         ? ` · od kola ${settings.force_home_round} rovno domov` : '';
+      el('g-seed').textContent = DATA.distribution ? DATA.distribution.seed : '— (deti ešte nie sú rozdelené)';
       el('btn-start').style.display = state.status === 'not_started' ? '' : 'none';
       el('btn-pause').style.display = state.status === 'running' ? '' : 'none';
       el('btn-resume').style.display = state.status === 'paused' ? '' : 'none';
@@ -191,9 +203,10 @@
       refresh();
     }
 
-    async function distribute(mode) {
-      const r = await api('/api/distribute', 'POST', { mode });
-      if (r.error) alert(r.error);
+    async function distribute(mode, seed) {
+      const r = await api('/api/distribute', 'POST', { mode, seed: (seed || '').trim() || undefined });
+      if (r.error) return alert(r.error);
+      if (r.distribution) el('seed-input').value = '';
       refresh();
     }
 

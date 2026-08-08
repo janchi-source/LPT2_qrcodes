@@ -9,6 +9,15 @@
 <body>
   <h1>Nastavenia <a href="index.html" style="font-size:0.8rem">← domov</a></h1>
 
+  <div class="card" id="manual-warning" style="display:none; border-left:4px solid #c0392b">
+    <h2 style="color:#c0392b">⚠️ Nastavenia nesedia s manuálom</h2>
+    <ul id="manual-diffs"></ul>
+    <p class="muted">Uložené nastavenia majú prednosť pred zabudovanými, takže sa to samo neopraví.
+      Tlačidlo prepíše <strong>len</strong> stanovištia, štartové rozostavenie a poistku „rovno domov“ —
+      počet skupín, kôl, bait, min. vzdialenosť ani strop skupiny sa nedotkne.</p>
+    <button class="primary" onclick="resetPodlaManualu()">↺ Nastaviť podľa manuálu</button>
+  </div>
+
   <div class="card">
     <h2>Hra</h2>
     <div class="row">
@@ -43,7 +52,15 @@
     <p class="muted">Rozdelenie zároveň drží <strong>rovnaké počty detí v skupinách počas celej hry</strong>:
       každá domovská skupina má rovnaký profil vzdialeností, takže z každej skupiny v kole odíde presne
       toľko detí, koľko do nej príde z predchádzajúcej.</p>
+    <div class="row">
+      <label>Max. detí v skupine <input id="max-group-size" type="number" min="0" max="99" style="width:70px"></label>
+      <span class="muted">0 = bez obmedzenia</span>
+    </div>
+    <p class="muted">Strop platí na <strong>domovskú</strong> skupinu — veľkosti skupín počas hry ich kopírujú,
+      takže inde sa vynútiť nedá. Dieťa nad strop sa nepridá (pri importe sa taký riadok preskočí
+      a vypíše sa dôvod).</p>
     <p id="home-warning" class="muted" style="display:none; color:#b9770e"></p>
+    <p id="limit-warning" class="muted" style="display:none; color:#c0392b"></p>
     <h2>Logistická poistka — rovno domov</h2>
     <div class="row">
       <label>Od kola <input id="force-home" type="number" min="0" max="20" style="width:70px"></label>
@@ -54,7 +71,11 @@
   </div>
 
   <div class="card">
-    <h2>Stanovištia (poradie = poradie rotácie A→B→…→A)</h2>
+    <h2>Stanovištia (poradie riadkov = poradie rotácie po areáli)</h2>
+    <p class="muted">Skupinky sa posúvajú <strong>v poradí týchto riadkov</strong>, nie podľa abecedy —
+      písmená sú len menovky aktivít. Podľa manuálu ide kruh po areáli
+      <code>zasadačka → záhrada → mantinely → Panna Mária → skautská → obývačka → tanečná → oľga → čajovňa → sála</code>,
+      preto je D pred C.</p>
     <table id="tbl-stations"></table>
     <h2>Počiatočné mapovanie skupina → stanovište</h2>
     <div id="start-map" class="row"></div>
@@ -101,10 +122,17 @@
       }
       pocetDeti = (s.children || []).length;
       SETTINGS = s.settings;
+
+      const mc = s.manual_check;
+      el('manual-warning').style.display = mc && !mc.ok ? '' : 'none';
+      if (mc && !mc.ok) {
+        el('manual-diffs').innerHTML = mc.rozdiely.map((x) => `<li>${esc(x)}</li>`).join('');
+      }
       el('num-groups').value = SETTINGS.num_groups;
       el('max-rounds').value = SETTINGS.max_rounds;
       el('force-home').value = SETTINGS.force_home_round ?? 0;
       el('min-start').value = SETTINGS.min_start_distance ?? 0;
+      el('max-group-size').value = SETTINGS.max_group_size ?? 0;
       el('bait-mode').value = SETTINGS.bait.mode;
       el('bait-fixed').value = SETTINGS.bait.delay_rounds;
       el('bait-min').value = SETTINGS.bait.random_min;
@@ -135,6 +163,16 @@
         el('home-warning').innerHTML = `⚠️ Domovské skupiny nie sú rovnako veľké (${bal.home_min}–${bal.home_max} detí). ` +
           'Veľkosti skupín počas hry ich kopírujú, takže úplne rovnaký počet nie je možný — ' +
           'vyrovnaj home_group v zozname detí.';
+      }
+
+      // Skupiny nad stropom — vzniknú, keď sa strop zníži až po importe.
+      // Deti sa nemažú, len sa to nahlási.
+      const nadStrop = (bal && bal.over_limit) || [];
+      el('limit-warning').style.display = nadStrop.length ? '' : 'none';
+      if (nadStrop.length) {
+        const zoznam = nadStrop.map((g) => `${g} (${bal.home_counts[g]})`).join(', ');
+        el('limit-warning').innerHTML = `⛔ Nad stropom ${bal.max_group_size} detí — skupiny: ${zoznam}. ` +
+          'Presuň deti do menších skupín, alebo strop zvýš.';
       }
 
       const kids = s.children.sort((a, b) => (a.wristband_number || 0) - (b.wristband_number || 0));
@@ -169,6 +207,7 @@
         max_rounds: parseInt(el('max-rounds').value, 10),
         force_home_round: parseInt(el('force-home').value, 10) || 0,
         min_start_distance: parseInt(el('min-start').value, 10) || 0,
+        max_group_size: parseInt(el('max-group-size').value, 10) || 0,
         stations,
         group_start_station,
         bait: {
@@ -180,6 +219,14 @@
       });
       el('save-msg').textContent = r.error ? 'Chyba: ' + r.error : '✅ uložené';
       refresh();
+    }
+
+    async function resetPodlaManualu() {
+      if (!confirm('Prepísať stanovištia, štartové rozostavenie a poistku „rovno domov" hodnotami z manuálu?')) return;
+      const r = await api('/api/settings/reset-manual', 'POST', {});
+      if (r.error) return alert('Nepodarilo sa uložiť:\n\n' + r.error);
+      await refresh();
+      alert('Hotovo — nastavenia sedia s manuálom.');
     }
 
     async function addChild() {
@@ -203,7 +250,9 @@
       const r = await api('/api/children/import', 'POST', { rows });
       el('import-msg').textContent = r.error ? 'Chyba: ' + r.error
         : `✅ importovaných: ${r.created}` + (r.errors.length ? ` · chyby: ${r.errors.join(' | ')}` : '');
-      if (!r.error) el('import-text').value = '';
+      // Textarea sa vyčistí, len keď prešlo VŠETKO. Inak by sa zamietnuté
+      // riadky (napr. plná skupina) stratili a museli by sa písať odznova.
+      if (!r.error && !r.errors.length) el('import-text').value = '';
       refresh();
     }
 

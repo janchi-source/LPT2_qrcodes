@@ -38,7 +38,9 @@ game.startGame();
 let st = game.getState();
 check('hra beží, kolo 1', st.status === 'running' && st.current_round === 1);
 check('skupina 1 na stanici A', st.groups[1].station === 'A');
-check('skupina 10 na stanici J', st.groups[10].station === 'J');
+// Skupiny sú rozostavané PROTI smeru rotácie (manuál, harmonogram str. 4),
+// takže skupina 10 štartuje o jedno stanovište za skupinou 1 — na B (záhrada).
+check('skupina 10 na stanici B (o jedno pozadu za sk. 1)', st.groups[10].station === 'B');
 
 // --- Jeden ručný sken: dieťa doma ---
 kids = game.getChildren();
@@ -76,7 +78,9 @@ check('po korekcii platí logika novej skupiny', r.result === 'move' || r.result
 
 // --- Ukončenie kola skupinou ---
 r = game.finishGroupRound(1);
-check('finish-round posunie stanicu', r.ok && game.getState().groups[1].station === 'C');
+// Rotácia ide po fyzickom kruhu A → B → D → C → …, nie podľa abecedy,
+// takže skupina 1 ide z B na D (mantinely), nie na C.
+check('finish-round posunie stanicu B -> D', r.ok && game.getState().groups[1].station === 'D');
 r = game.finishGroupRound(1);
 check('druhý finish-round v tom istom kole odmietnutý', !!r.error);
 
@@ -233,6 +237,64 @@ for (const cfg of [
 }
 check('homeGroupBalance: rovnaké domovské skupiny = vyvážené', game.homeGroupBalance().home_balanced === true);
 
+// --- Strop na veľkosť skupiny -----------------------------------------------
+// Vynucuje sa na DOMOVSKEJ skupine, lebo veľkosti skupín počas hry ich
+// kopírujú (viď distributeChildren) — inde sa vynútiť nedá.
+// Východisko: blok vyššie prepísal dáta na 100 detí, teda 10 na skupinu.
+check('strop: východisko je 10 detí v každej domovskej skupine',
+  Object.values(game.homeGroupBalance().home_counts).every((n) => n === 10));
+
+game.saveSettings({ max_group_size: 10 });
+let s = game.importChildren([{ name: 'Nad strop', home_group: 1 }]);
+check('strop: dieťa nad strop sa nepridá',
+  s.created.length === 0 && s.errors.length === 1 && /plná \(10\/10/.test(s.errors[0]),
+  s.errors[0]);
+
+game.saveSettings({ max_group_size: 11 });
+s = game.importChildren([{ name: 'Ešte sa zmestí', home_group: 1 }]);
+check('strop: pod strop sa dieťa pridá', s.created.length === 1 && s.errors.length === 0,
+  JSON.stringify(s.errors));
+check('strop: skupina 1 je teraz na strope', game.homeGroupBalance().home_counts[1] === 11);
+
+// Strop musí platiť aj v rámci JEDNÉHO importu — inak by sa dal obísť tým,
+// že sa celá skupina nahrá naraz. Skupina 2 má 10 detí, posielame 3.
+s = game.importChildren([
+  { name: 'Dávka 1', home_group: 2 },
+  { name: 'Dávka 2', home_group: 2 },
+  { name: 'Dávka 3', home_group: 2 },
+]);
+check('strop: v rámci jedného importu prejde len to, čo sa zmestí',
+  s.created.length === 1 && s.errors.length === 2,
+  `prijatých ${s.created.length}, chýb ${s.errors.length}`);
+check('strop: skupina 2 je presne na strope', game.homeGroupBalance().home_counts[2] === 11);
+
+// Presun dieťaťa do plnej skupiny cez updateChild (skupina 1 je na strope).
+const stehovane = game.getChildren().find((c) => c.home_group === 3);
+const presun = game.updateChild(stehovane.id, { home_group: 1 });
+check('strop: presun do plnej skupiny sa odmietne',
+  !!presun.error && /plná/.test(presun.error), JSON.stringify(presun));
+check('strop: dieťa po odmietnutom presune ostalo, kde bolo',
+  game.getChildren().find((c) => c.id === stehovane.id).home_group === 3);
+// Presun do skupiny, kde je miesto, prejsť musí.
+check('strop: presun do voľnej skupiny prejde',
+  !game.updateChild(stehovane.id, { home_group: 4 }).error);
+
+// Vypnutý strop (0) nesmie brániť ničomu.
+game.saveSettings({ max_group_size: 0 });
+s = game.importChildren([{ name: 'Bez stropu', home_group: 1 }]);
+check('strop: hodnota 0 obmedzenie vypne', s.created.length === 1 && s.errors.length === 0,
+  JSON.stringify(s.errors));
+
+// Zníženie stropu po importe deti NEMAŽE, len ich nahlási v Nastaveniach.
+game.saveSettings({ max_group_size: 5 });
+const poctyPred = game.getChildren().length;
+const nadStrop = game.homeGroupBalance();
+check('strop: skupiny nad znížený strop sa nahlásia',
+  nadStrop.over_limit.length === 10 && nadStrop.max_group_size === 5,
+  JSON.stringify(nadStrop.over_limit));
+check('strop: zníženie stropu deti nezmazalo', game.getChildren().length === poctyPred);
+game.saveSettings({ max_group_size: 0 });
+
 // Nerovnaké domovské skupiny sa rozdelením vyrovnať nedajú — appka to hlási.
 // (rozdiel 1 dieťa je ešte OK, tu pridávame 3 do jednej domovskej skupiny)
 game.importChildren([
@@ -242,7 +304,8 @@ game.importChildren([
 ]);
 const bal = game.homeGroupBalance();
 check('homeGroupBalance: nevyvážené domovské skupiny sa detegujú',
-  bal.home_balanced === false && bal.home_max === 13 && bal.home_min === 10);
+  bal.home_balanced === false && bal.home_max - bal.home_min >= 2,
+  `min=${bal.home_min} max=${bal.home_max}`);
 
 fs.rmSync(process.env.LPT2_DATA_DIR, { recursive: true, force: true });
 console.log(failures ? `\n${failures} FAILED` : '\nVŠETKY TESTY PREŠLI');

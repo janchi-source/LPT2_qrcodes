@@ -1,6 +1,6 @@
 # LPT2 — Rozdeľovacia hra (doobedie)
 
-Logistická appka na správu rozdeľovacej hry: 10 skupín, 10 stanovíšť (A–J v kruhu),
+Logistická appka na správu rozdeľovacej hry: 10 skupín, 10 stanovíšť v kruhu po areáli,
 deti s QR náramkami sa postupne „rozdeľujú“ do svojich domovských skupín.
 
 ## Kde to beží
@@ -181,6 +181,7 @@ z náramku vždy zadať ručne.
 | `/admin.html` | prehľad detí a skupín, filtre, manuálny override, log, ovládanie hry |
 | `/settings.html` | počty, stanovištia, mapovanie skupina→stanovište, bait prah, pridávanie/import detí |
 | `/qr.html` | QR kódy všetkých detí — štítky na náramky, na tlač/PDF |
+| `/rozpis.html` | **štartové zloženie skupiniek na vytlačenie** — každá skupinka na vlastnej A4, so seedom v hlavičke (Cmd+P → Uložiť ako PDF) |
 
 ## Dizajn skenovacej stránky
 
@@ -270,6 +271,20 @@ Poznámky:
 
 ## Herná logika (lib/game.js)
 
+- **Stanovištia a rotácia idú podľa manuálu.** Poradie poľa `settings.stations`
+  **nie je abecedné** — kopíruje fyzický kruh po areáli („STANOVIŠTIA IDÚ DO
+  KRUHU PO AREÁLI“): zasadačka → záhrada → mantinely → Panna Mária → skautská →
+  obývačka → tanečná → oľga → čajovňa → sála. Preto je **D pred C**; písmená sú
+  len menovky aktivít. Skupiny sú rozostavané **proti smeru rotácie**
+  (sk.1 A, sk.2 J, sk.3 I, …), takže skupina g+1 príde v ďalšom kole presne
+  tam, kde bola skupina g. Zhodu s manuálom (vrátane celého harmonogramu zo
+  strany 4) drží `test/manual-zhoda.test.js`.
+- **Pozor: uložené nastavenia prekrývajú defaulty.** Oprava v
+  `defaultSettings()` sa na nasadenie, ktoré už raz nastavenia uložilo,
+  nedostane. Preto appka rozdiel oproti manuálu hlási v Nastaveniach a ponúka
+  tlačidlo **„Nastaviť podľa manuálu“** (`POST /api/settings/reset-manual`),
+  ktoré prepíše len stanovištia, rozostavenie a poistku „rovno domov“.
+
 - **Zhoda** `home_group == aktuálna skupina` → dieťa ostáva, counter sa nuluje (zelená).
 - **Nezhoda** → `rounds_in_wrong_group++`; kým je counter **pod prahom**
   (`bait_delay`), dieťa ostáva ako „bait“ (animátorovi sa ukáže zelená, deti nič
@@ -280,6 +295,17 @@ Poznámky:
   **Pozn. k sémantike:** prah 0 a 1 znamenajú „presun hneď pri prvom
   nesúhlasnom skene“, prah 2 = dieťa ostane 1 kolo navyše. Presné pravidlo sa
   ladí na jednom mieste: `computeBaitDelay()` v `lib/game.js`.
+- **Rozdelenie sa robí raz pred hrou a je spätne dohľadateľné.**
+  `distributeChildren(mode, seed)` používa deterministický generátor
+  (`lib/seed.js`) — s rovnakým seedom vznikne presne to isté rozdelenie do
+  posledného dieťaťa. Seed sa ukladá spolu s režimom a časom (`distribution`)
+  a zobrazuje sa v Admine aj v hlavičke tlačového rozpisu, takže sa dá stav
+  kedykoľvek obnoviť alebo spätne overiť. Reset hry ho zmaže, aby sa nedal
+  vytlačiť neplatný rozpis.
+- **Poistka „rovno domov" (`force_home_round`) je defaultne vypnutá** a má tak
+  aj zostať: manuál pozná výhradne posun o jednu skupinku vyššie. Nie je ani
+  potrebná — pri `min_start_distance` 2 je najväčšia vzdialenosť 9 skupín,
+  teda 9 kôl z 10.
 - **Porotovanie na štarte `min_start_distance`** (default 2, 0 = vypnuté):
   pri rozdelení detí do skupín dostane každé dieťa skupinu vzdialenú aspoň
   takto veľa od jeho domovskej (v smere rotácie +1). Pri hodnote 2 nie je
@@ -343,6 +369,15 @@ npm test
 
 Simuluje celú hru (105 detí, 10 kôl) vrátane bait prahu, korekcií a edge caseov.
 
+Okrem toho:
+
+| test | čo drží |
+|---|---|
+| `manual-zhoda.test.js` | zhodu s manuálom — stanovištia, rotácia, rozostavenie aj celý harmonogram kolo × skupina |
+| `rozdelenie.test.js` | že rovnaký seed dá vždy rovnaké rozdelenie a že hra dohrá bez poistky „rovno domov“ |
+| `routovanie.test.js` | že sa dvoj- a trojsegmentové `/api` cesty trafia do routovania (na Verceli to raz padalo) |
+| `supabase.test.js` | súbeh 10 skenov proti falošnému PostgRESTu — žiadny sken sa nesmie stratiť |
+
 ## Rozhodnutia pri nejasnostiach (na skontrolovanie)
 
 - **Počiatočné rozdelenie**: „Podľa náramkov“ / „Náhodne“ určuje len poradie,
@@ -351,7 +386,8 @@ Simuluje celú hru (105 detí, 10 kôl) vrátane bait prahu, korekcií a edge ca
   Súvislé bloky podľa manuálu (1–11 → sk. 1, …) vzniknú pri
   `min_start_distance` = 0 len vtedy, keď sú domovské skupiny v poradí
   náramkov rovnomerne rozhádzané.
-- **Počiatočné mapovanie**: skupina 1 → A, 2 → B, … 10 → J; editovateľné v Settings.
+- **Počiatočné mapovanie**: podľa harmonogramu v manuáli (sk.1 → A, sk.2 → J,
+  sk.3 → I, …); editovateľné v Settings.
 - **Kapacita staníc sa nerieši** — skupina je proste množina detí, stanica ju
   zvládne v ľubovoľnej veľkosti (manuál kapacity nešpecifikuje).
 - **„Ukončiť kolo“ je per skupina** — každá skupina sa posúva vlastným tempom,
