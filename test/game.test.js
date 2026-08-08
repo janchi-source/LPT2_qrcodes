@@ -111,25 +111,30 @@ check('hra skončila po max_rounds', st.status === 'finished');
 // kolo o +1, takže domov dôjde každé (d <= 9 < 10 kôl) — všetci doma.
 check('všetky deti doma (prah 1, 10 kôl)', homeCount === kids.length);
 
-// --- Edge case: dieťa čo to nestihne (prah 2 spomalí presuny, poistka vypnutá) ---
+// --- Nastavenie, pri ktorom by hra nedopadla, sa NESMIE dať spustiť ----------
+// Prah 2 znamená 2 kolá na jeden posun, takže najvzdialenejšie dieťa (9 skupín)
+// potrebuje 18 kôl. Hra ich má 10 — časť detí by sa domov nikdy nedostala
+// a na tábore by sa na to prišlo až o 11:40. Kontrola to musí zachytiť vopred.
 game.resetGame();
 game.saveSettings({ bait: { mode: 'fixed', delay_rounds: 2, random_min: 0, random_max: 2 }, force_home_round: 0 });
 game.distributeChildren('wristband');
-game.startGame();
-guard = 0;
-while (game.getState().status === 'running' && guard++ < 20) {
-  const state = game.getState();
-  for (let g = 1; g <= 10; g++) {
-    for (const c of game.getChildren().filter((x) => x.current_group === g)) {
-      game.processScan(c.qr_code, g, state.groups[g].station);
-    }
-    game.finishGroupRound(g);
-  }
-}
-kids = game.getChildren();
-const notHome = kids.filter((c) => c.current_group !== c.home_group).length;
-console.log(`  info: s prahom 2 skončilo mimo domova ${notHome}/${kids.length} detí (očakávané > 0)`);
-check('edge case existuje: nie všetci doma pri prahu 2', notHome > 0);
+const nevyjde = game.preflight();
+check('kontrola vopred odhalí, že pri prahu 2 hra nevyjde',
+  nevyjde.ok === false && nevyjde.chyby.some((x) => /18 kôl/.test(x)),
+  JSON.stringify(nevyjde.chyby));
+check('kontrola vyráta správnu rezervu kôl',
+  nevyjde.vypocty.potrebnych_kol === 18 && nevyjde.vypocty.kol_na_presun === 2,
+  JSON.stringify(nevyjde.vypocty));
+
+const odmietnute = game.startGame();
+check('startGame takú hru odmietne spustiť', !!odmietnute.error, JSON.stringify(odmietnute).slice(0, 120));
+check('a hra naozaj nebeží', game.getState().status === 'not_started');
+
+// Po oprave prahu na 1 musí tá istá zostava prejsť.
+game.saveSettings({ bait: { mode: 'fixed', delay_rounds: 1, random_min: 0, random_max: 2 } });
+check('po oprave prahu kontrola prejde', game.preflight().ok === true,
+  JSON.stringify(game.preflight().chyby));
+check('a hra sa spustí', !game.startGame().error && game.getState().status === 'running');
 
 // --- Logistická poistka force_home_round: od daného kola rovno domov ---
 game.resetGame();
@@ -219,22 +224,30 @@ const sizesNow = () => {
 };
 const ROVNAKE = Array(10).fill(10).join(',');
 
+// Prah 2 potrebuje 2 kolá na posun, teda 18 kôl na najdlhšiu cestu — bez
+// zvýšenia max_rounds by kontrola pred štartom hru odmietla a test by prešiel
+// naprázdno (hra by vôbec nebežala).
 for (const cfg of [
-  { label: 'prah 1', bait: { mode: 'fixed', delay_rounds: 1, random_min: 0, random_max: 2 }, force: 0 },
-  { label: 'prah 2', bait: { mode: 'fixed', delay_rounds: 2, random_min: 0, random_max: 2 }, force: 0 },
-  { label: 'poistka od kola 8', bait: { mode: 'fixed', delay_rounds: 1, random_min: 0, random_max: 2 }, force: 8 },
+  { label: 'prah 1', bait: { mode: 'fixed', delay_rounds: 1, random_min: 0, random_max: 2 }, force: 0, kola: 10 },
+  { label: 'prah 2', bait: { mode: 'fixed', delay_rounds: 2, random_min: 0, random_max: 2 }, force: 0, kola: 18 },
+  { label: 'poistka od kola 8', bait: { mode: 'fixed', delay_rounds: 1, random_min: 0, random_max: 2 }, force: 8, kola: 10 },
 ]) {
   for (const mode of ['wristband', 'random']) {
     game.resetGame();
-    game.saveSettings({ bait: cfg.bait, force_home_round: cfg.force, min_start_distance: 2 });
+    game.saveSettings({ bait: cfg.bait, force_home_round: cfg.force, min_start_distance: 2, max_rounds: cfg.kola });
     game.distributeChildren(mode);
     const seen = new Set([sizesNow()]);
-    game.startGame();
-    for (let round = 1; round <= 10; round++) { game.simulateRound(); seen.add(sizesNow()); }
+    // Bez tejto kontroly by sa dalo prehliadnuť, že hra vôbec nezačala —
+    // `seen` by ostalo pri štartovej hodnote a test by „prešiel" bez hry.
+    const start = game.startGame();
+    check(`hra sa spustila (${cfg.label}, ${mode})`, !start.error && game.getState().status === 'running',
+      JSON.stringify(start).slice(0, 160));
+    for (let round = 1; round <= cfg.kola; round++) { game.simulateRound(); seen.add(sizesNow()); }
     check(`v každej skupine je vždy presne 10 detí (${cfg.label}, ${mode})`,
       seen.size === 1 && seen.has(ROVNAKE), [...seen].join(' | '));
   }
 }
+game.saveSettings({ max_rounds: 10 });
 check('homeGroupBalance: rovnaké domovské skupiny = vyvážené', game.homeGroupBalance().home_balanced === true);
 
 // --- Strop na veľkosť skupiny -----------------------------------------------

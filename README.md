@@ -295,6 +295,17 @@ Poznámky:
   **Pozn. k sémantike:** prah 0 a 1 znamenajú „presun hneď pri prvom
   nesúhlasnom skene“, prah 2 = dieťa ostane 1 kolo navyše. Presné pravidlo sa
   ladí na jednom mieste: `computeBaitDelay()` v `lib/game.js`.
+- **Kontrola pred štartom (`preflight()`).** Hra, ktorá by matematicky
+  nedopadla, sa **vôbec nespustí** — `startGame()` ju odmietne. Chyba
+  v nastaveniach by sa inak prejavila až o 11:40, keď v areáli stojí 106 detí.
+  Kľúčový výpočet: najdlhšia cesta domov je `najväčšia vzdialenosť × kolá na
+  jeden posun` a musí sa zmestiť do `max_rounds`. Pri prahu 2 to je
+  9 × 2 = 18 kôl, takže hra s 10 kolami sa nespustí. Ďalej sa kontroluje:
+  duplicitné QR kódy, domovská skupina mimo rozsahu, viac skupín než stanovíšť,
+  dve skupiny na jednom štartovom stanovišti, kapacita (`num_groups × max_group_size`)
+  a či vôbec sú deti. Nevyvážené domovské skupiny, náhodný bait a zapnutá
+  poistka sú len **varovania** — hru neblokujú, lebo to je rozhodnutie vedúcich.
+  Stav je vidno v Admine ešte pred štartom (zelený/červený box s výpočtom).
 - **Rozdelenie sa robí raz pred hrou a je spätne dohľadateľné.**
   `distributeChildren(mode, seed)` používa deterministický generátor
   (`lib/seed.js`) — s rovnakým seedom vznikne presne to isté rozdelenie do
@@ -375,6 +386,7 @@ Okrem toho:
 |---|---|
 | `manual-zhoda.test.js` | zhodu s manuálom — stanovištia, rotácia, rozostavenie aj celý harmonogram kolo × skupina |
 | `rozdelenie.test.js` | že rovnaký seed dá vždy rovnaké rozdelenie a že hra dohrá bez poistky „rovno domov“ |
+| `kontrola.test.js` | že sa hra, ktorá by nedopadla, nespustí — každý spôsob, ako to pokaziť, zvlášť |
 | `routovanie.test.js` | že sa dvoj- a trojsegmentové `/api` cesty trafia do routovania (na Verceli to raz padalo) |
 | `supabase.test.js` | súbeh 10 skenov proti falošnému PostgRESTu — žiadny sken sa nesmie stratiť |
 

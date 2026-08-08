@@ -9,6 +9,8 @@
 <body>
   <h1>Admin — Rozdeľovacia hra <a href="index.html" style="font-size:0.8rem">← domov</a></h1>
 
+  <div class="card" id="kontrola" style="display:none"></div>
+
   <div class="card">
     <div class="row">
       <div class="grow">
@@ -88,6 +90,33 @@
       el('g-force').textContent = settings.force_home_round >= 1
         ? ` · od kola ${settings.force_home_round} rovno domov` : '';
       el('g-seed').textContent = DATA.distribution ? DATA.distribution.seed : '— (deti ešte nie sú rozdelené)';
+      renderKontrolu();
+    }
+
+    // Kontrola pred štartom — chyby znamenajú, že hra by matematicky nedopadla
+    // a nespustí sa. Po štarte už nemá zmysel strašiť, tak sa skryje.
+    function renderKontrolu() {
+      const p = DATA.preflight;
+      const box = el('kontrola');
+      if (!p || DATA.state.status !== 'not_started') { box.style.display = 'none'; return; }
+      box.style.display = '';
+
+      const v = p.vypocty;
+      const suhrn = `${v.deti} detí · ${v.skupiny} skupín · ${v.kola} kôl · `
+        + `najdlhšia cesta domov ${v.najvacsia_vzdialenost} `
+        + `${v.najvacsia_vzdialenost === 1 ? 'posun' : 'posunov'} × ${v.kol_na_presun} `
+        + `= ${v.potrebnych_kol} kôl` + (p.ok ? ` · rezerva ${v.rezerva_kol}` : '');
+
+      box.style.borderLeft = p.ok ? '4px solid #27ae60' : '4px solid #c0392b';
+      box.innerHTML = (p.ok
+        ? '<h2 style="color:#27ae60; margin-top:0">✅ Hra matematicky vyjde</h2>'
+        : '<h2 style="color:#c0392b; margin-top:0">⛔ Hra by nevyšla — nedá sa spustiť</h2>')
+        + (p.chyby.length ? `<ul>${p.chyby.map((x) => `<li><strong>${esc(x)}</strong></li>`).join('')}</ul>` : '')
+        + (p.varovania.length
+          ? `<p class="muted" style="margin-bottom:4px">Na vedomie:</p><ul class="muted">${
+            p.varovania.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>`
+          : '')
+        + `<p class="muted">${esc(suhrn)}${v.rozdelene ? '' : ' · počítané z najhoršieho možného rozdelenia'}</p>`;
       el('btn-start').style.display = state.status === 'not_started' ? '' : 'none';
       el('btn-pause').style.display = state.status === 'running' ? '' : 'none';
       el('btn-resume').style.display = state.status === 'paused' ? '' : 'none';
