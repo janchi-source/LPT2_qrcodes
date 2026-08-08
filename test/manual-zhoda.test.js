@@ -114,19 +114,30 @@ check('poradie MIEST v rotácii zodpovedá kruhu po areáli',
   kruhMiestManual.map(normalizujMiesto).join(',') === kruhMiestKod.map(normalizujMiesto).join(','),
   `manuál: ${kruhMiestManual.join(' → ')}\n           appka:  ${kruhMiestKod.join(' → ')}`);
 
-console.log('\n--- 3. Štartové rozostavenie skupín -----------------------------------');
+console.log('\n--- 3. Štartové rozostavenie — VEDOMÁ odchýlka od manuálu ----------');
 
+// Harmonogram na strane 4 a pravidlo „dieťa ide o skupinku vyššie" si
+// protirečia a nedá sa mať oboje:
+//
+// V rozostavení z manuálu je skupina g+1 o jedno stanovište POZADU za skupinou
+// g, takže príde presne tam, kde presunuté dieťa už stojí. Dieťa síce mení
+// skupinku každé kolo, ale stanovište NIKDY — odohralo by tú istú aktivitu
+// všetkých 10 kôl. Pri posune o +1 sa tomu vyhnúť nedá: 10 skupín obsadzuje
+// 10 stanovíšť a všetky sa posúvajú naraz.
+//
+// Rozhodnutie: prednosť má to, aby sa dieťa posúvalo. Skupiny sú preto
+// rozostavané po poradí kruhu (sk.1 → A, sk.2 → B, sk.3 → D …).
+// Tabuľka na strane 4 tým prestáva platiť — animátori idú podľa /rozpis.html.
 for (let g = 1; g <= 10; g++) {
-  const kod = S.group_start_station[g];
-  check(`skupina ${g} štartuje na ${MANUAL_START[g]} (${MANUAL_HARMONOGRAM[0][g - 1]})`,
-    kod === MANUAL_START[g],
-    `appka má: ${kod}`);
+  const ocakavane = MANUAL_KRUH[(g - 1) % 10];
+  check(`skupina ${g} štartuje na ${ocakavane} (o stanovište vpred pred sk. ${g - 1 || 10})`,
+    S.group_start_station[g] === ocakavane, `appka má: ${S.group_start_station[g]}`);
 }
+check('rozostavenie sa naozaj líši od harmonogramu na strane 4 (vedome)',
+  MANUAL_HARMONOGRAM[0].some((m, i) => miestoNaPismeno[normalizujMiesto(m)] !== S.group_start_station[i + 1]));
 
-console.log('\n--- 4. Celý harmonogram: kolo × skupina -------------------------------');
+console.log('\n--- 4. Harmonogram appky musí byť rozumný --------------------------');
 
-// Odsimulujeme len pohyb stanovíšť (deti naň nemajú vplyv) a porovnáme
-// s tabuľkou z manuálu.
 function harmonogramAppky(settings) {
   const poradie = settings.stations.map((s) => s.letter);
   const tab = [];
@@ -142,49 +153,57 @@ function harmonogramAppky(settings) {
 }
 
 const tabKod = harmonogramAppky(S);
-const tabManual = MANUAL_HARMONOGRAM.map((r) => r.map((m) => miestoNaPismeno[normalizujMiesto(m)]));
-let nesedi = 0;
-const ukazky = [];
-for (let k = 0; k < 10; k++) {
-  for (let g = 0; g < 10; g++) {
-    if (tabKod[k][g] !== tabManual[k][g]) {
-      nesedi++;
-      if (ukazky.length < 4) {
-        ukazky.push(`kolo ${k + 1}, sk.${g + 1}: manuál ${tabManual[k][g]}, appka ${tabKod[k][g]}`);
-      }
-    }
-  }
+
+// Aj keď sa rozostavenie od manuálu líši, tieto dve veci platiť MUSIA:
+// na jednom stanovišti nesmú byť dve skupiny naraz a každá skupina musí
+// za 10 kôl prejsť všetkých 10 stanovíšť.
+let kolizii = 0;
+for (const kolo of tabKod) if (new Set(kolo).size !== kolo.length) kolizii++;
+check('v žiadnom kole nie sú dve skupiny na tom istom stanovišti', kolizii === 0,
+  `kôl s kolíziou: ${kolizii}`);
+
+let neuplne = 0;
+for (let g = 0; g < 10; g++) {
+  const navstivene = new Set(tabKod.map((kolo) => kolo[g]));
+  if (navstivene.size !== 10) neuplne++;
 }
-check('celý harmonogram (100 políčok) sedí s manuálom', nesedi === 0,
-  `nesedí ${nesedi} zo 100 · napr. ${ukazky.join(' · ')}`);
+check('každá skupina prejde za 10 kôl všetkých 10 stanovíšť', neuplne === 0,
+  `skupín s neúplnou trasou: ${neuplne}`);
 
-console.log('\n--- 5. Kľúčový dôsledok: presunuté dieťa nemá kam chodiť --------------');
+console.log('\n--- 5. Presunuté dieťa sa MUSÍ posunúť ---------------------------');
 
-// Manuál: dieťa, ktoré do skupinky nepatrí, ide „do nasledujúcej skupinky".
-// V harmonograme to funguje preto, že skupina g+1 príde PRESNE tam, kde bola
-// skupina g — dieťa teda ostáva fyzicky stáť a počká na ďalšiu skupinu.
-// Overíme to najprv na manuáli (musí platiť), potom na appke.
-function dietaOstavaStat(tab, numGroups) {
-  const chyby = [];
-  for (let k = 0; k + 1 < tab.length; k++) {
-    for (let g = 1; g <= numGroups; g++) {
-      const dalsia = (g % numGroups) + 1;
-      if (tab[k][g - 1] !== tab[k + 1][dalsia - 1]) {
-        chyby.push(`kolo ${k + 1}: sk.${g} je na ${tab[k][g - 1]}, ale sk.${dalsia} príde v ďalšom kole na ${tab[k + 1][dalsia - 1]}`);
-      }
-    }
+// Toto je dôvod celej odchýlky vyššie. Dieťa, ktoré do skupinky nepatrí,
+// putuje o skupinku vyššie každé kolo — a pri každom takom presune sa musí
+// dostať na INÉ stanovište, inak by hralo tú istú aktivitu dokola.
+function trasaDietata(tab, startSkupina) {
+  const trasa = [];
+  let g = startSkupina;
+  for (let kolo = 0; kolo < tab.length; kolo++) {
+    trasa.push(tab[kolo][g - 1]);
+    g = (g % 10) + 1; // presun o skupinku vyššie
   }
-  return chyby;
+  return trasa;
 }
 
-const chybyManual = dietaOstavaStat(tabManual, 10);
-check('(kontrola samotného manuálu) skupina g+1 prichádza tam, kde bola skupina g',
-  chybyManual.length === 0, chybyManual.slice(0, 2).join(' · '));
+let stojace = 0;
+for (let start = 1; start <= 10; start++) {
+  const trasa = trasaDietata(tabKod, start);
+  for (let i = 1; i < trasa.length; i++) if (trasa[i] === trasa[i - 1]) stojace++;
+}
+check('dieťa nikdy neostane dve kolá po sebe na tom istom stanovišti', stojace === 0,
+  `prípadov státia: ${stojace}`);
 
-const chybyKod = dietaOstavaStat(tabKod, 10);
-check('appka: presunuté dieťa ostáva stáť a počká na ďalšiu skupinu',
-  chybyKod.length === 0,
-  `porušené ${chybyKod.length}× · napr. ${chybyKod.slice(0, 2).join(' · ')}`);
+const ukazkaTrasy = trasaDietata(tabKod, 2);
+check('dieťa zažije viac než jednu aktivitu', new Set(ukazkaTrasy).size > 1,
+  `trasa: ${ukazkaTrasy.join(' → ')}`);
+console.log(`  info: dieťa štartujúce v sk.2 prejde: ${ukazkaTrasy.join(' → ')} `
+  + `(${new Set(ukazkaTrasy).size} rôznych stanovíšť)`);
+
+// Pre porovnanie: v rozostavení z manuálu by stálo na jednom mieste celú hru.
+const podlaManualu = { ...S, group_start_station: MANUAL_START };
+const trasaManual = trasaDietata(harmonogramAppky(podlaManualu), 2);
+check('(dôkaz) v rozostavení z manuálu by dieťa stálo na jednom stanovišti',
+  new Set(trasaManual).size === 1, `trasa: ${trasaManual.join(' → ')}`);
 
 console.log('\n--- 6. Pravidlo presunu: nesúhlasiace dieťa ide o skupinu vyššie ------');
 

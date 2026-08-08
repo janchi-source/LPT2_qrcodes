@@ -38,9 +38,10 @@ game.startGame();
 let st = game.getState();
 check('hra beží, kolo 1', st.status === 'running' && st.current_round === 1);
 check('skupina 1 na stanici A', st.groups[1].station === 'A');
-// Skupiny sú rozostavané PROTI smeru rotácie (manuál, harmonogram str. 4),
-// takže skupina 10 štartuje o jedno stanovište za skupinou 1 — na B (záhrada).
-check('skupina 10 na stanici B (o jedno pozadu za sk. 1)', st.groups[10].station === 'B');
+// Skupiny sú rozostavané po poradí kruhu (sk.1 → A, sk.2 → B, sk.3 → D …),
+// aby sa presunuté dieťa vždy dostalo na iné stanovište. Skupina 10 je teda
+// posledná v kruhu — na J (sála).
+check('skupina 10 na stanici J (posledná v kruhu)', st.groups[10].station === 'J');
 
 // --- Jeden ručný sken: dieťa doma ---
 kids = game.getChildren();
@@ -110,6 +111,33 @@ check('hra skončila po max_rounds', st.status === 'finished');
 // Pri prahu 1 a 10 kolách: dieťa začínajúce vo vzdialenosti d sa presúva každé
 // kolo o +1, takže domov dôjde každé (d <= 9 < 10 kôl) — všetci doma.
 check('všetky deti doma (prah 1, 10 kôl)', homeCount === kids.length);
+
+// --- Presunuté dieťa sa musí vždy posunúť aj na INÉ stanovište ---------------
+// Dieťa, ktoré do skupinky nepatrí, putuje o skupinku vyššie každé kolo. Keby
+// pritom ostalo stáť na jednom mieste, hralo by tú istú aktivitu dokola —
+// presne to sa dialo pri rozostavení z manuálu (viď test/manual-zhoda.test.js).
+game.resetGame();
+game.saveSettings({ bait: { mode: 'fixed', delay_rounds: 1, random_min: 0, random_max: 2 }, force_home_round: 0, min_start_distance: 2 });
+game.distributeChildren('wristband');
+game.startGame();
+
+// Sledujeme dieťa, ktoré je najďalej od domova — putuje najviac kôl.
+const putovnik = game.getChildren()
+  .reduce((a, b) => ((b.home_group - b.current_group + 10) % 10) > ((a.home_group - a.current_group + 10) % 10) ? b : a);
+const trasaStanovisk = [];
+for (let kolo = 1; kolo <= 10; kolo++) {
+  const stav = game.getState();
+  const c = game.getChildren().find((x) => x.id === putovnik.id);
+  trasaStanovisk.push(stav.groups[c.current_group].station);
+  game.simulateRound();
+}
+let stalo = 0;
+for (let i = 1; i < trasaStanovisk.length; i++) if (trasaStanovisk[i] === trasaStanovisk[i - 1]) stalo++;
+check('dieťa nikdy neostane dve kolá po sebe na tom istom stanovišti', stalo === 0,
+  `trasa: ${trasaStanovisk.join(' → ')}`);
+check('a zažije viac rôznych aktivít', new Set(trasaStanovisk).size >= 5,
+  `rôznych: ${new Set(trasaStanovisk).size} · ${trasaStanovisk.join(' → ')}`);
+console.log(`  info: putujúce dieťa prejde ${trasaStanovisk.join(' → ')}`);
 
 // --- Rozdelenie sa prispôsobí počtu kôl --------------------------------------
 // Počet kôl je daný harmonogramom (10 stanovíšť = 10 kôl), takže sa mu musí

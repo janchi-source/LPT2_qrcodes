@@ -275,10 +275,23 @@ Poznámky:
   **nie je abecedné** — kopíruje fyzický kruh po areáli („STANOVIŠTIA IDÚ DO
   KRUHU PO AREÁLI“): zasadačka → záhrada → mantinely → Panna Mária → skautská →
   obývačka → tanečná → oľga → čajovňa → sála. Preto je **D pred C**; písmená sú
-  len menovky aktivít. Skupiny sú rozostavané **proti smeru rotácie**
-  (sk.1 A, sk.2 J, sk.3 I, …), takže skupina g+1 príde v ďalšom kole presne
-  tam, kde bola skupina g. Zhodu s manuálom (vrátane celého harmonogramu zo
-  strany 4) drží `test/manual-zhoda.test.js`.
+  len menovky aktivít.
+
+- **Štartové rozostavenie sa od manuálu vedome líši.** Harmonogram na strane 4
+  a pravidlo „dieťa ide o skupinku vyššie“ si protirečia. V rozostavení
+  z manuálu je skupina g+1 o stanovište **pozadu**, takže príde presne tam, kde
+  presunuté dieťa už stojí — dieťa mení skupinku každé kolo, ale **stanovište
+  nikdy** a odohralo by tú istú aktivitu všetkých 10 kôl. Pri posune o +1 sa
+  tomu vyhnúť nedá (10 skupín obsadzuje 10 stanovíšť a všetky sa posúvajú
+  naraz), takže platí buď tabuľka zo strany 4, alebo sa dieťa posúva.
+
+  Appka volí druhé: skupiny sú rozostavané **po poradí kruhu** (sk.1 → A,
+  sk.2 → B, sk.3 → D …), takže sa presunuté dieťa každé kolo posunie o dve
+  stanovištia dopredu a zažije 5 rôznych aktivít namiesto jednej.
+  **Tabuľka na strane 4 manuálu tým prestáva platiť** — animátori idú podľa
+  `/rozpis.html`. Celé to drží `test/manual-zhoda.test.js`, ktorý odchýlku
+  overuje aj dokazuje (vrátane toho, že pri rozostavení z manuálu by dieťa
+  naozaj stálo na jednom mieste).
 - **Pozor: uložené nastavenia prekrývajú defaulty.** Oprava v
   `defaultSettings()` sa na nasadenie, ktoré už raz nastavenia uložilo,
   nedostane. Preto appka rozdiel oproti manuálu hlási v Nastaveniach a ponúka
@@ -403,7 +416,7 @@ Okrem toho:
 
 | test | čo drží |
 |---|---|
-| `manual-zhoda.test.js` | zhodu s manuálom — stanovištia, rotácia, rozostavenie aj celý harmonogram kolo × skupina |
+| `manual-zhoda.test.js` | zhodu s manuálom (stanovištia, rotácia) a to, že vedomá odchýlka v rozostavení naozaj rieši stojace dieťa |
 | `rozdelenie.test.js` | že rovnaký seed dá vždy rovnaké rozdelenie a že hra dohrá bez poistky „rovno domov“ |
 | `kontrola.test.js` | že sa rozdelenie prispôsobí počtu kôl a že sa hra, ktorá sa zachrániť nedá, nespustí |
 | `routovanie.test.js` | že sa dvoj- a trojsegmentové `/api` cesty trafia do routovania (na Verceli to raz padalo) |
