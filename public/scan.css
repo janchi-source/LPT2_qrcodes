@@ -253,6 +253,16 @@ select:focus, input:focus { outline: 3px solid rgba(251, 207, 53, 0.85); outline
 #scan-result.home, #scan-result.bait { display: block; background: var(--zelena); box-shadow: 0 8px 24px rgba(30, 132, 73, 0.4); }
 #scan-result.move { display: block; background: var(--cervena); box-shadow: 0 8px 24px rgba(192, 57, 43, 0.4); }
 #scan-result.error { display: block; background: #4d4d4d; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3); }
+/* „Nepatrí sem" musí byť na prvý pohľad odlíšiteľné od červenej „ide do
+   skupinky X". Červená je normálny výsledok hry (dieťa putuje ďalej), toto je
+   odmietnutý sken — nič sa nezapísalo a animátor má dieťa len poslať preč.
+   Preto jantárová a biely rám, nie ďalší odtieň červenej. */
+#scan-result.cudzie {
+  display: block;
+  background: #b9770e;
+  border: 3px solid #ffe9a8;
+  box-shadow: 0 8px 24px rgba(185, 119, 14, 0.45);
+}
 #scan-result .big-name {
   font-size: 1.5rem;
   font-weight: 900;

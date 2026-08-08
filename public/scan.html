@@ -327,6 +327,25 @@
         return;
       }
       el('offline-banner').style.display = 'none';
+      // Dieťa, ktoré do tejto skupinky nepatrí. Animátor potrebuje hlavne
+      // vedieť, KAM ho poslať — meno a cieľ preto veľkým, nie celú hlášku.
+      if (r.nepatri) {
+        const kam = r.patri_do_skupinky
+          ? `⛔ NEPATRÍ SEM — je v skupinke ${r.patri_do_skupinky}`
+            + (r.patri_na_stanoviste ? ` (${r.patri_na_stanoviste.letter} — ${r.patri_na_stanoviste.place})` : '')
+          : `⛔ NEPATRÍ SEM — ${r.error}`;
+        showResult('cudzie', (r.child && r.child.name) || 'Neznáme dieťa', kam);
+        prehraj('snd-nepatri');
+        if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+        return;
+      }
+      // Zle nastavené stanovište/skupinka v telefóne — to je chyba nastavenia
+      // animátora, nie dieťaťa, a týka sa všetkých ďalších skenov.
+      if (r.zle_stanoviste) {
+        showResult('error', 'Zlé nastavenie', r.error);
+        if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 100]);
+        return;
+      }
       if (r.error) { showResult('error', 'Chyba', r.error); return; }
 
       const c = r.child;

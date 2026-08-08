@@ -68,14 +68,32 @@ game.forceAdvanceRound();
 st = game.getState();
 check('kolo 2', st.current_round === 2);
 check('skupina 1 sa posunula A->B', st.groups[1].station === 'B');
-r = game.processScan(baitKid.qr_code, 2, 'C');
+r = game.processScan(baitKid.qr_code, 2, game.getState().groups[2].station);
 check('prah 2: 2. sken -> move do sk. 3', r.result === 'move' && r.moved_to === 3);
 
-// --- Korekcia: dieťa fyzicky v inej skupine, než appka eviduje ---
-const strayKid = game.getChildren().find((c) => c.current_group === 5 && c.home_group === 5);
-r = game.processScan(strayKid.qr_code, 7, 'X'); // naskenované v skupine 7
-check('korekcia zaznamenaná', r.corrected === true);
-check('po korekcii platí logika novej skupiny', r.result === 'move' || r.result === 'bait');
+// --- Cudzie dieťa sa na stanovište naskenovať NESMIE ---
+// Predtým appka uverila realite a dieťaťu potichu prepísala skupinku. Tým sa
+// omyl nikdy neprejavil — animátor naskenoval cudzie dieťa a nikto sa o tom
+// nedozvedel. Teraz sken neprejde a animátor rovno vidí, kam dieťa patrí.
+const strayKid = game.getChildren().find((c) => c.current_group === 5);
+const cudziaSkupina = strayKid.current_group === 7 ? 6 : 7;
+r = game.processScan(strayKid.qr_code, cudziaSkupina, game.getState().groups[cudziaSkupina].station);
+check('cudzie dieťa sa odmietne', r.nepatri === true && !!r.error);
+check('hláška povie, do ktorej skupinky patrí', r.patri_do_skupinky === 5);
+check('hláška povie aj kde tú skupinku hľadať',
+  !!r.patri_na_stanoviste && r.patri_na_stanoviste.letter === game.getState().groups[5].station);
+check('odmietnutý sken nič nezmenil',
+  game.getChildren().find((c) => c.id === strayKid.id).current_group === 5);
+check('a nedostal sa ani do logu',
+  !game.getState().scans.some((x) => x.child_id === strayKid.id));
+
+// Nesprávne nastavené stanovište v telefóne sa tiež zachytí.
+const domaci = game.getChildren().find((c) => c.current_group === 5);
+const zleStanovisko = game.getSettings().stations.find((x) => x.letter !== game.getState().groups[5].station).letter;
+r = game.processScan(domaci.qr_code, 5, zleStanovisko);
+check('zle nastavené stanovište sa odmietne', r.zle_stanoviste === true,
+  JSON.stringify(r).slice(0, 140));
+check('a poradí to správne', r.spravne_stanoviste === game.getState().groups[5].station);
 
 // --- Ukončenie kola skupinou ---
 r = game.finishGroupRound(1);
@@ -177,7 +195,7 @@ game.startGame();
 kids = game.getChildren();
 const farKid = kids.find((c) => c.current_group != null
   && (c.home_group - c.current_group + 10) % 10 >= 3);
-r = game.processScan(farKid.qr_code, farKid.current_group, 'A');
+r = game.processScan(farKid.qr_code, farKid.current_group, game.getState().groups[farKid.current_group].station);
 check('poistka: nesúhlasiace dieťa ide rovno do home_group',
   r.result === 'move' && r.moved_to === farKid.home_group && r.forced_home === true);
 check('poistka: dieťa je hneď doma',

@@ -372,9 +372,20 @@ Poznámky:
   kola sa bait aj posun +1 ignorujú a nesúhlasiace dieťa ide pri skene ROVNO
   do svojej domovskej skupinky (skener ukáže „🏠 IDE DOMOV — SKUPINKA X“).
   Garantuje správne rozdelenie na konci hry bez ohľadu na bait nastavenie.
-- **Korekcia reality**: ak sa naskenuje dieťa v skupine, kde ho appka
-  neevidovala (utieklo, chyba), appka uverí realite — preradí ho do skenujúcej
-  skupiny (log `correction`) a až potom aplikuje pravidlá.
+- **Na stanovište sa smú skenovať LEN deti, ktoré tam podľa appky sú.**
+  Cudzie dieťa sken neprejde: nič sa nezapíše a skener ukáže jantárové
+  „⛔ NEPATRÍ SEM — je v skupinke X (písmeno — miesto)“, takže animátor rovno
+  vidí, kam ho poslať. Jantárová je zámerne iná farba než červená „➡️ IDE DO
+  SKUPINKY X“ — červená je normálny výsledok hry, toto je odmietnutý sken.
+
+  Predtým appka pri nezhode uverila realite a dieťaťu potichu prepísala
+  skupinku. Znelo to rozumne, ale znamenalo to, že sa omyl nikdy neprejavil —
+  animátor naskenoval cudzie dieťa, appka to prijala a nikto sa nedozvedel, že
+  niekde nastala chyba. Keď je appka naozaj mimo (vynechal sa sken), skupinku
+  prepíše admin ručne v Admin stránke — vedome a so záznamom.
+- **Zle nastavené stanovište v telefóne** sa zachytí tiež: keď animátor skenuje
+  pod stanovišťom, na ktorom jeho skupinka v tomto kole nie je, sken neprejde
+  a appka povie, kde skupinka naozaj je. Bez toho by celý log klamal.
 - **Duplicitný sken** v tom istom kole sa nezapočíta dvakrát, animátor dostane
   upozornenie.
 - **Edge case „nestihne domov“**: posun je len +1 skupina/kolo, takže dieťa

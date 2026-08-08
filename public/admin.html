@@ -90,6 +90,9 @@
       el('g-force').textContent = settings.force_home_round >= 1
         ? ` · od kola ${settings.force_home_round} rovno domov` : '';
       el('g-seed').textContent = DATA.distribution ? DATA.distribution.seed : '— (deti ešte nie sú rozdelené)';
+      el('btn-start').style.display = state.status === 'not_started' ? '' : 'none';
+      el('btn-pause').style.display = state.status === 'running' ? '' : 'none';
+      el('btn-resume').style.display = state.status === 'paused' ? '' : 'none';
       renderKontrolu();
     }
 
@@ -119,9 +122,6 @@
             p.varovania.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>`
           : '')
         + `<p class="muted">${esc(suhrn)}${v.rozdelene ? '' : ' · počítané z najhoršieho možného rozdelenia'}</p>`;
-      el('btn-start').style.display = state.status === 'not_started' ? '' : 'none';
-      el('btn-pause').style.display = state.status === 'running' ? '' : 'none';
-      el('btn-resume').style.display = state.status === 'paused' ? '' : 'none';
     }
 
     function renderGroups() {
@@ -188,7 +188,7 @@
           : s.forced_home ? `presun → sk. ${s.moved_to} (rovno domov)`
           : `presun → sk. ${s.moved_to}`;
         html += `<tr><td>${new Date(s.ts).toLocaleTimeString('sk')}</td><td>${s.round}</td>
-          <td>${esc(s.station)}</td><td>${s.group}</td><td>${esc(s.name)}${s.corrected ? ' ⚠️korekcia' : ''}</td><td>${res}</td></tr>`;
+          <td>${esc(s.station)}</td><td>${s.group}</td><td>${esc(s.name)}</td><td>${res}</td></tr>`;
       }
       el('tbl-log').innerHTML = html;
     }
